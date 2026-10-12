@@ -1,0 +1,51 @@
+experiment: full_history_training_v2
+source_id: adsblol_historical_adsb
+year: 2025
+months: [8, 12, 2, 3, 4, 5, 6, 9, 10, 11]
+expected_dates: 303
+expected_parts: 605
+expected_published_bytes: 936759552512
+asset_manifest: configs/full_history_training_v2_assets.json
+source_repairs: configs/full_history_training_v2_repairs.json
+metadata_root: artifacts/audits/full_history_rebuild_2026-09-27/metadata
+run_root: artifacts/runs/full_history_training_v2
+raw_root: data/external/raw/adsblol_historical_adsb/full-history-training-v2
+processed_root: data/external/processed/adsblol_historical_adsb/full-history-training-v2
+legacy_processed_root: data/external/processed/adsblol_historical_adsb/full-history-v1
+raw_retention: relevant_aircraft_entire_day_original_gzip_and_global_member_index
+recycle_new_global_spool_after_native_audit: true
+maximum_active_dates: 12
+minimum_free_bytes: 107374182400
+direct_listener_name: prc-fullhistory-direct
+direct_listener_port: 17898
+airports: [EDDF, EDDM, EGLL, EHAM, LEBL, LEMD, LFPG, LIRF, LSZH, LTFM]
+airport_radius_km: 50.0
+decode_workers: 4
+maximum_member_bytes: 67108864
+maximum_decoded_member_bytes: 134217728
+movement_all_partitions: true
+point_thinning: false
+target_callsign_prefilter: false
+retain_original_trace_payload: true
+reads_dep_labels: false
+fits_models: false
+uploads_submissions: false
+transport:
+  payload_route: DIRECT
+  metadata_redirect_route: existing_proxy_after_measured_github_direct_timeout
+  metadata_response_body_bytes: 0
+  cdn_host: release-assets.githubusercontent.com
+  cdn_ipv4_candidates: [185.199.111.133, 185.199.109.133]
+  asset_workers: 12
+  segments_per_asset: 4
+  segment_bytes: 33554432
+  maximum_attempts_per_segment: 48
+  read_timeout_seconds: 35
+  segment_deadline_seconds: 180
+  slow_window_seconds: 45
+  minimum_segment_bytes_per_second: 524288
+  minimum_free_bytes: 107374182400
+  target_minimum_free_bytes: 107374182400
+  maximum_bulk_body_bytes: 1010000000000
+  tls_hostname_verification: true
+  proxy_payload_fallback: false

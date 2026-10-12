@@ -1,0 +1,27 @@
+# Python 3.10.  Versions of the development environment.
+numpy==2.2.6
+pandas==2.3.3
+pyarrow==24.0.0
+PyYAML==6.0.3
+# models
+xgboost==3.2.0
+lightgbm==4.6.0
+catboost==1.2.10
+torch==2.13.0
+tabm==0.0.3
+rtdl_num_embeddings==0.0.12
+# base features and external data
+networkx==3.4.2
+holidays==0.103
+openap==2.4
+xarray==2025.6.1
+zarr==2.18.3
+fsspec==2026.3.0
+# ADS-B.lol download and decoding
+requests==2.34.0
+urllib3==2.7.0
+aiohttp==3.13.5
+ijson==3.5.1
+orjson==3.11.9
+# upload of the final file
+minio==7.2.20

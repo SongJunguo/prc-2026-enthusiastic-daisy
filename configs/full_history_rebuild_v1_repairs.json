@@ -1,0 +1,29 @@
+{
+  "days": {
+    "2026-01-29": {
+      "date": "2026-01-29",
+      "tag": "v2026.01.29-planes-readsb-prod-0",
+      "published_at": "2026-01-30T03:32:24Z",
+      "parts": [
+        {
+          "name": "v2026.01.29-planes-readsb-prod-0.tar.aa",
+          "url": "https://github.com/adsblol/globe_history_2026/releases/download/v2026.01.29-planes-readsb-prod-0/v2026.01.29-planes-readsb-prod-0.tar.aa",
+          "size": 2000000000,
+          "path": "data/external/raw/adsblol_historical_adsb/full-history-v1/2026-01-29/v2026.01.29-planes-readsb-prod-0.tar.aa",
+          "reused_legacy": false
+        },
+        {
+          "name": "v2026.01.29-planes-readsb-prod-0.tar.ab",
+          "url": "https://github.com/adsblol/globe_history_2026/releases/download/v2026.01.29-planes-readsb-prod-0/v2026.01.29-planes-readsb-prod-0.tar.ab",
+          "size": 1285065728,
+          "path": "data/external/raw/adsblol_historical_adsb/full-history-v1/2026-01-29/v2026.01.29-planes-readsb-prod-0.tar.ab",
+          "reused_legacy": false
+        }
+      ],
+      "published_bytes": 3285065728,
+      "repair_reason": "Preferred staging release has a gzip member invalid across the 2GB boundary; DIRECT remote ranges exactly equal the failing local bytes. Preserve it and use the same-date published prod replica."
+    }
+  },
+  "evidence": "artifacts/runs/full_history_rebuild_v1/corrupt_2026-01-29_remote_comparison.json",
+  "original_preferred_assets_preserved": true
+}

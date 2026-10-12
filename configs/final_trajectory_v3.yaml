@@ -1,0 +1,39 @@
+experiment: final_trajectory_v3
+# Final blind phase announced 2026-10-08: February and June 2026 are new
+# scored months.  Same public ADSB.lol source, selection and decoder as
+# full_history_training_v2; only the calendar and a plain direct transport
+# with temporary source-domain DIRECT routing differ.
+source_id: adsblol_historical_adsb
+year: 2026
+months: [2, 6]
+expected_dates: 58
+preferred_index: artifacts/audits/full_history_rebuild_2026-09-27/metadata/preferred_2026.txt
+release_metadata: artifacts/audits/full_history_rebuild_2026-09-27/metadata
+run_root: artifacts/runs/final_trajectory_v3
+raw_root: data/external/raw/adsblol_historical_adsb/final-trajectory-v3
+processed_root: data/external/processed/adsblol_historical_adsb/final-trajectory-v3
+airports: [EDDF, EDDM, EGLL, EHAM, LEBL, LEMD, LFPG, LIRF, LSZH, LTFM]
+airport_radius_km: 50.0
+decode_workers: 2
+maximum_active_dates: 12
+maximum_member_bytes: 67108864
+maximum_decoded_member_bytes: 134217728
+minimum_free_bytes: 107374182400
+movement_all_partitions: false
+point_thinning: false
+target_callsign_prefilter: false
+retain_original_trace_payload: true
+# Temporarily retained for the unchanged native byte audit, then retired.
+keep_original_trace_backup: false
+reads_dep_labels: false
+fits_models: false
+uploads_submissions: false
+transport:
+  use_public_release_api: true
+  asset_workers: 12
+  segments_per_asset: 4
+  segment_bytes: 33554432
+  slow_window_seconds: 90
+  minimum_bytes_per_second: 16384
+  maximum_attempts_per_segment: 30
+  timeout_seconds: 60

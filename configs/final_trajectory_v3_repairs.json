@@ -1,0 +1,147 @@
+{
+  "days": {
+    "2026-06-07": {
+      "date": "2026-06-07",
+      "tag": "v2026.06.07-planes-readsb-prod-0",
+      "parts": [
+        {
+          "name": "v2026.06.07-planes-readsb-prod-0.tar.aa",
+          "url": "https://github.com/adsblol/globe_history_2026/releases/download/v2026.06.07-planes-readsb-prod-0/v2026.06.07-planes-readsb-prod-0.tar.aa",
+          "size": 2000000000,
+          "path": "data/external/raw/adsblol_historical_adsb/final-trajectory-v3/spool/2026-06-07/v2026.06.07-planes-readsb-prod-0.tar.aa",
+          "reused_legacy": false
+        },
+        {
+          "name": "v2026.06.07-planes-readsb-prod-0.tar.ab",
+          "url": "https://github.com/adsblol/globe_history_2026/releases/download/v2026.06.07-planes-readsb-prod-0/v2026.06.07-planes-readsb-prod-0.tar.ab",
+          "size": 1342876160,
+          "path": "data/external/raw/adsblol_historical_adsb/final-trajectory-v3/spool/2026-06-07/v2026.06.07-planes-readsb-prod-0.tar.ab",
+          "reused_legacy": false
+        }
+      ],
+      "published_bytes": 3342876160,
+      "original_source": {
+        "date": "2026-06-07",
+        "tag": "v2026.06.07-planes-readsb-staging-0",
+        "parts": [
+          {
+            "name": "v2026.06.07-planes-readsb-staging-0.tar.aa",
+            "url": "https://github.com/adsblol/globe_history_2026/releases/download/v2026.06.07-planes-readsb-staging-0/v2026.06.07-planes-readsb-staging-0.tar.aa",
+            "size": 2000000000,
+            "path": "data/external/raw/adsblol_historical_adsb/final-trajectory-v3/spool/2026-06-07/v2026.06.07-planes-readsb-staging-0.tar.aa",
+            "reused_legacy": false
+          },
+          {
+            "name": "v2026.06.07-planes-readsb-staging-0.tar.ab",
+            "url": "https://github.com/adsblol/globe_history_2026/releases/download/v2026.06.07-planes-readsb-staging-0/v2026.06.07-planes-readsb-staging-0.tar.ab",
+            "size": 1368222720,
+            "path": "data/external/raw/adsblol_historical_adsb/final-trajectory-v3/spool/2026-06-07/v2026.06.07-planes-readsb-staging-0.tar.ab",
+            "reused_legacy": false
+          }
+        ],
+        "published_bytes": 3368222720
+      },
+      "reason": "Preferred staging gzip at offset 1999997952 fails across the 2 GB part boundary. A bounded DIRECT source reread of all 135503 member bytes equals the local payload and produces the same decompression error. Independently validate the same-date published prod release; the native range receipt is artifacts/runs/final_trajectory_v3/source_repair_2026-06-07/failed_member_probe.json."
+    },
+    "2026-06-23": {
+      "date": "2026-06-23",
+      "tag": "v2026.06.23-planes-readsb-prod-0",
+      "parts": [
+        {
+          "name": "v2026.06.23-planes-readsb-prod-0.tar.aa",
+          "url": "https://github.com/adsblol/globe_history_2026/releases/download/v2026.06.23-planes-readsb-prod-0/v2026.06.23-planes-readsb-prod-0.tar.aa",
+          "size": 2000000000,
+          "path": "data/external/raw/adsblol_historical_adsb/final-trajectory-v3/spool/2026-06-23/v2026.06.23-planes-readsb-prod-0.tar.aa",
+          "reused_legacy": false
+        },
+        {
+          "name": "v2026.06.23-planes-readsb-prod-0.tar.ab",
+          "url": "https://github.com/adsblol/globe_history_2026/releases/download/v2026.06.23-planes-readsb-prod-0/v2026.06.23-planes-readsb-prod-0.tar.ab",
+          "size": 1972288512,
+          "path": "data/external/raw/adsblol_historical_adsb/final-trajectory-v3/spool/2026-06-23/v2026.06.23-planes-readsb-prod-0.tar.ab",
+          "reused_legacy": false
+        }
+      ],
+      "published_bytes": 3972288512,
+      "original_source": {
+        "date": "2026-06-23",
+        "tag": "v2026.06.23-planes-readsb-staging-0",
+        "parts": [
+          {
+            "name": "v2026.06.23-planes-readsb-staging-0.tar.aa",
+            "url": "https://github.com/adsblol/globe_history_2026/releases/download/v2026.06.23-planes-readsb-staging-0/v2026.06.23-planes-readsb-staging-0.tar.aa",
+            "size": 2000000000,
+            "path": "data/external/raw/adsblol_historical_adsb/final-trajectory-v3/spool/2026-06-23/v2026.06.23-planes-readsb-staging-0.tar.aa",
+            "reused_legacy": false
+          },
+          {
+            "name": "v2026.06.23-planes-readsb-staging-0.tar.ab",
+            "url": "https://github.com/adsblol/globe_history_2026/releases/download/v2026.06.23-planes-readsb-staging-0/v2026.06.23-planes-readsb-staging-0.tar.ab",
+            "size": 1973302784,
+            "path": "data/external/raw/adsblol_historical_adsb/final-trajectory-v3/spool/2026-06-23/v2026.06.23-planes-readsb-staging-0.tar.ab",
+            "reused_legacy": false
+          }
+        ],
+        "published_bytes": 3973302784
+      },
+      "reason": "Preferred staging gzip at offset 1999871488 fails across the 2 GB split. A bounded DIRECT public API reread of all 133107 member bytes equals the local payload and reproduces EOFError. Independently validate the same-date published prod release; evidence is artifacts/runs/final_trajectory_v3/source_repair_2026-06-23/failed_member_probe.json."
+    },
+    "2026-06-25": {
+      "date": "2026-06-25",
+      "tag": "v2026.06.25-planes-readsb-prod-0",
+      "parts": [
+        {
+          "name": "v2026.06.25-planes-readsb-prod-0.tar.aa",
+          "url": "https://github.com/adsblol/globe_history_2026/releases/download/v2026.06.25-planes-readsb-prod-0/v2026.06.25-planes-readsb-prod-0.tar.aa",
+          "size": 2000000000,
+          "path": "data/external/raw/adsblol_historical_adsb/final-trajectory-v3/spool/2026-06-25/v2026.06.25-planes-readsb-prod-0.tar.aa",
+          "reused_legacy": false
+        },
+        {
+          "name": "v2026.06.25-planes-readsb-prod-0.tar.ab",
+          "url": "https://github.com/adsblol/globe_history_2026/releases/download/v2026.06.25-planes-readsb-prod-0/v2026.06.25-planes-readsb-prod-0.tar.ab",
+          "size": 2000000000,
+          "path": "data/external/raw/adsblol_historical_adsb/final-trajectory-v3/spool/2026-06-25/v2026.06.25-planes-readsb-prod-0.tar.ab",
+          "reused_legacy": false
+        },
+        {
+          "name": "v2026.06.25-planes-readsb-prod-0.tar.ac",
+          "url": "https://github.com/adsblol/globe_history_2026/releases/download/v2026.06.25-planes-readsb-prod-0/v2026.06.25-planes-readsb-prod-0.tar.ac",
+          "size": 174927360,
+          "path": "data/external/raw/adsblol_historical_adsb/final-trajectory-v3/spool/2026-06-25/v2026.06.25-planes-readsb-prod-0.tar.ac",
+          "reused_legacy": false
+        }
+      ],
+      "published_bytes": 4174927360,
+      "original_source": {
+        "date": "2026-06-25",
+        "tag": "v2026.06.25-planes-readsb-staging-0",
+        "parts": [
+          {
+            "name": "v2026.06.25-planes-readsb-staging-0.tar.aa",
+            "url": "https://github.com/adsblol/globe_history_2026/releases/download/v2026.06.25-planes-readsb-staging-0/v2026.06.25-planes-readsb-staging-0.tar.aa",
+            "size": 2000000000,
+            "path": "data/external/raw/adsblol_historical_adsb/final-trajectory-v3/spool/2026-06-25/v2026.06.25-planes-readsb-staging-0.tar.aa",
+            "reused_legacy": false
+          },
+          {
+            "name": "v2026.06.25-planes-readsb-staging-0.tar.ab",
+            "url": "https://github.com/adsblol/globe_history_2026/releases/download/v2026.06.25-planes-readsb-staging-0/v2026.06.25-planes-readsb-staging-0.tar.ab",
+            "size": 2000000000,
+            "path": "data/external/raw/adsblol_historical_adsb/final-trajectory-v3/spool/2026-06-25/v2026.06.25-planes-readsb-staging-0.tar.ab",
+            "reused_legacy": false
+          },
+          {
+            "name": "v2026.06.25-planes-readsb-staging-0.tar.ac",
+            "url": "https://github.com/adsblol/globe_history_2026/releases/download/v2026.06.25-planes-readsb-staging-0/v2026.06.25-planes-readsb-staging-0.tar.ac",
+            "size": 177656320,
+            "path": "data/external/raw/adsblol_historical_adsb/final-trajectory-v3/spool/2026-06-25/v2026.06.25-planes-readsb-staging-0.tar.ac",
+            "reused_legacy": false
+          }
+        ],
+        "published_bytes": 4177656320
+      },
+      "reason": "Preferred staging gzip at offset 1999986688 fails across the 2 GB split. A bounded DIRECT public API reread of all 32582 member bytes equals the local payload and reproduces the invalid literal/length error. Independently validate the same-date published prod release; evidence is artifacts/runs/final_trajectory_v3/source_repair_2026-06-25/failed_member_probe.json."
+    }
+  }
+}

@@ -1,0 +1,39 @@
+# Local credentials
+credentials.json
+.env
+.env.*
+!.env.example
+
+# Downloaded competition data
+data/
+*.parquet
+
+# Generated models, experiment state, and submissions
+artifacts/
+models/
+submissions/
+logs/
+wandb/
+mlruns/
+lightning_logs/
+*.pkl
+*.pickle
+*.joblib
+
+# Python and notebook caches
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+
+# Local environments and editor state
+.venv/
+venv/
+.idea/
+.vscode/
+
+# Local links to data and generated artifacts (not part of the repository)
+/data
+/artifacts

@@ -1,0 +1,58 @@
+# Settings of the ADS-B ground-track features (src/prc2026/traj_events.py and the per-flight
+# formulas in departure_episode.py, direction_events.py and adsblol_stand.py).
+minimum_ground_points: 10
+geometry_root: data/external/processed/xplane_scenery_gateway/xplane-gateway-temporal-v2
+airport_reference: data/external/processed/ourairports/2026-09-01/airports.parquet
+phase:
+  minimum_fast_air_speed_knots: 80.0
+  minimum_air_height_above_airport_ft: 100.0
+  maximum_run_gap_seconds: 120.0
+  minimum_run_points: 3
+  maximum_transition_gap_seconds: 900.0
+  maximum_takeoff_match_seconds: 900.0
+  maximum_ground_distance_metres: 10000.0
+offblock:
+  moving_speed_knots: 2.0
+  sustained_window_seconds: 180.0
+  sustained_min_moving_points: 3
+  sustained_displacement_metres: 100.0
+  last_gap_seconds: 300.0
+polarity:
+  maximum_transition_gap_seconds: 120.0
+  match_tolerance_seconds: 900.0
+direction:
+  window_seconds: 20.0
+  maximum_gap_seconds: 15.0
+  minimum_displacement_metres: 10.0
+  minimum_speed_knots: 0.5
+  maximum_speed_knots: 15.0
+  maximum_step_speed_knots: 20.0
+  maximum_heading_change_degrees: 30.0
+  reverse_angle_degrees: 135.0
+  forward_angle_degrees: 45.0
+  minimum_run_span_seconds: 20.0
+  minimum_run_path_metres: 20.0
+  near_stand_metres: 250.0
+  maximum_follow_seconds: 600.0
+  permutation_seed: 20260930
+stand_detector:
+  stand_radius_metres: 75.0
+  moving_speed_knots: 2.0
+  sustained_window_seconds: 240.0
+  sustained_min_moving_points: 3
+  sustained_away_distance_metres: 100.0
+  dwell_lookback_seconds: 10800.0
+  departure_dwell_link_seconds: 600.0
+  departure_min_dwell_points: 3
+  departure_min_dwell_span_seconds: 60.0
+  censored_min_dwell_points: 10
+  censored_min_dwell_span_seconds: 600.0
+  censored_max_dwell_gap_seconds: 600.0
+  censored_away_distance_metres: 300.0
+  censored_max_transition_gap_seconds: 1800.0
+  censored_offset_seconds: 60.0
+  terminal_parking_min_points: 10
+  terminal_parking_min_span_seconds: 600.0
+  terminal_parking_max_point_gap_seconds: 600.0
+  terminal_parking_max_step_metres: 100.0
+  terminal_parking_radius_metres: 100.0

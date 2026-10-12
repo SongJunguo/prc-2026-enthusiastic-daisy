@@ -1,0 +1,30 @@
+{
+  "days": {
+    "2025-10-14": {
+      "date": "2025-10-14",
+      "tag": "v2025.10.14-planes-readsb-prod-0",
+      "published_at": "2025-10-17T08:57:14Z",
+      "parts": [
+        {
+          "name": "v2025.10.14-planes-readsb-prod-0.tar.aa",
+          "url": "https://github.com/adsblol/globe_history_2025/releases/download/v2025.10.14-planes-readsb-prod-0/v2025.10.14-planes-readsb-prod-0.tar.aa",
+          "size": 2000000000,
+          "path": "data/external/raw/adsblol_historical_adsb/full-history-training-v2/spool/2025-10-14/v2025.10.14-planes-readsb-prod-0.tar.aa",
+          "reused_legacy": false
+        },
+        {
+          "name": "v2025.10.14-planes-readsb-prod-0.tar.ab",
+          "url": "https://github.com/adsblol/globe_history_2025/releases/download/v2025.10.14-planes-readsb-prod-0/v2025.10.14-planes-readsb-prod-0.tar.ab",
+          "size": 1381369856,
+          "path": "data/external/raw/adsblol_historical_adsb/full-history-training-v2/spool/2025-10-14/v2025.10.14-planes-readsb-prod-0.tar.ab",
+          "reused_legacy": false
+        }
+      ],
+      "published_bytes": 3381369856,
+      "repair_reason": "Preferred staging source has an invalid gzip across the 2 GB split. Both DIRECT remote ranges exactly match the failing local 12128-byte member. Preserve the failed source and validate the same-date public prod release."
+    }
+  },
+  "evidence": "artifacts/runs/full_history_training_v2/corrupt_2025-10-14_probe/remote_comparison.json",
+  "public_metadata": "artifacts/audits/full_history_rebuild_2026-09-27/metadata/releases_2025_03.json",
+  "original_preferred_assets_preserved": true
+}

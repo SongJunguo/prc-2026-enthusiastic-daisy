@@ -1,0 +1,12 @@
+airports:
+  EDDF: {country: DE, timezone: Europe/Berlin}
+  EDDM: {country: DE, timezone: Europe/Berlin}
+  EGLL: {country: GB, timezone: Europe/London}
+  EHAM: {country: NL, timezone: Europe/Amsterdam}
+  LEBL: {country: ES, timezone: Europe/Madrid}
+  LEMD: {country: ES, timezone: Europe/Madrid}
+  LFPG: {country: FR, timezone: Europe/Paris}
+  LIRF: {country: IT, timezone: Europe/Rome}
+  LTAI: {country: TR, timezone: Europe/Istanbul}
+  LTFM: {country: TR, timezone: Europe/Istanbul}
+  LSZH: {country: CH, timezone: Europe/Zurich}

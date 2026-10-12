@@ -1,0 +1,35 @@
+experiment: full_history_rebuild_v1
+source_id: adsblol_historical_adsb
+years: [2025, 2026]
+months: [1, 7]
+expected_dates: 124
+expected_parts: 258
+expected_published_bytes: 388515885056
+metadata_root: artifacts/audits/full_history_rebuild_2026-09-27/metadata
+asset_manifest: configs/full_history_rebuild_v1_assets.json
+run_root: artifacts/runs/full_history_rebuild_v1
+raw_root: data/external/raw/adsblol_historical_adsb/full-history-v1
+legacy_raw_root: data/external/raw/adsblol_history
+processed_root: data/external/processed/adsblol_historical_adsb/full-history-v1
+plan: docs/plans/full_history_rebuild_2026-09-27/EXECUTION.md
+download_workers: 4
+bulk_route: DIRECT
+proxy_fallback: false
+maximum_attempts_per_part: 6
+maximum_download_bytes: 350800000000
+minimum_free_bytes: 107374182400
+probe_bytes: 8388608
+direct_listener_name: prc-fullhistory-direct
+direct_listener_port: 17898
+source_hosts: [github.com, release-assets.githubusercontent.com]
+airports: [EDDF, EDDM, EGLL, EHAM, LEBL, LEMD, LFPG, LIRF, LSZH, LTFM]
+airport_radius_km: 50.0
+decode_workers: 4
+maximum_member_bytes: 67108864
+maximum_decoded_member_bytes: 134217728
+point_thinning: false
+target_callsign_prefilter: false
+retain_original_trace_payload: true
+reads_dep_labels: false
+fits_models: false
+uploads_submissions: false

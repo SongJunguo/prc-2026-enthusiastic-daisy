@@ -1,0 +1,210 @@
+registry_version: 1
+note: External sources used by the final pipeline. Data are not redistributed; each source keeps its own licence.
+sources:
+- id: adsblol_historical_adsb
+  category: traffic_surveillance
+  status: prepared
+  official_url: https://www.adsb.lol/docs/open-data/historical/
+  acquisition_url: https://github.com/adsblol/globe_history_2025
+  license: ODbL-1.0 database; contributing feeder data are offered under CC0 where legally possible
+  license_url: https://github.com/adsblol/globe_history_2026/blob/main/LICENSE-ODbL.txt
+  expected_artifacts:
+  - selected daily split tar releases
+  - sparse half-hour heatmap checkpoints
+  - airport-scoped matched ground traces
+  - coverage and ambiguity audit
+  - full Jan-Jul raw aircraft archives
+  - unthinned full-field airport sequences
+  - complete DEP feature matrices
+  intended_signals:
+  - first observed ground movement
+  - surface path
+  - runway sequence
+  - departure callsign and time matching
+  redistribution_note: Raw daily archives remain ignored; publish exact release URLs, downloader, extraction method,
+    attribution, and ODbL-compliant derivative-data instructions.
+  final_prepared_version: final-trajectory-v3
+- id: copernicus_era5_single_levels
+  category: weather_reanalysis
+  status: prepared
+  official_url: https://cds.climate.copernicus.eu/datasets/reanalysis-era5-single-levels
+  acquisition_url: https://arco.datastores.ecmwf.int/cadl-arco-geo-002/arco/reanalysis_era5_single_levels/sfc/geoChunked.zarr
+  fallback_acquisition_url: https://cds.climate.copernicus.eu/api
+  license: CC-BY-4.0
+  license_url: https://cds.climate.copernicus.eu/datasets/reanalysis-era5-single-levels?tab=overview
+  expected_artifacts:
+  - airport-point hourly Parquet tables
+  intended_signals:
+  - temperature
+  - dewpoint
+  - pressure
+  - wind
+  - gust
+  - precipitation
+  - cloud
+  redistribution_note: Retain Copernicus attribution and dataset DOI; prefer scripted subsets over redistributing
+    raw files.
+  prepared_version: arco-geo-v2
+  final_prepared_version: arco-geo-final-v3
+- id: noaa_ghcnh
+  category: surface_weather_observations
+  status: prepared
+  official_url: https://www.ncei.noaa.gov/products/global-historical-climatology-network-hourly
+  acquisition_url: https://www.ncei.noaa.gov/oa/global-historical-climatology-network/hourly/access/by-year/
+  license: NOAA public information; NOAA and contributing-source attribution retained
+  license_url: https://www.ncei.noaa.gov/sites/default/files/2025-04/NAO_212-15B-Data_Mgt_Handbook-2024-Oct-1_destinations_2025.pdf%23.pdf
+  expected_artifacts:
+  - GHCN-H station list
+  - station-year Parquet files
+  - airport-scoped target-period Parquet files
+  intended_signals:
+  - visibility
+  - ceiling
+  - raw METAR
+  - weather phenomena
+  - temperature
+  - dewpoint
+  - wind
+  - precipitation
+  - snow
+  redistribution_note: Raw observations remain ignored and are not redistributed; publish the downloader, source
+    URLs, source codes, and NOAA attribution.
+  prepared_snapshot: '2026-09-01'
+  final_prepared_snapshot: '2026-10-08'
+- id: ourairports
+  category: airport_reference
+  status: prepared
+  official_url: https://ourairports.com/data/
+  acquisition_url: https://github.com/davidmegginson/ourairports-data
+  license: Public Domain
+  license_url: https://github.com/davidmegginson/ourairports-data/blob/main/LICENSE
+  expected_artifacts:
+  - airports.csv
+  - runways.csv
+  - countries.csv
+  - regions.csv
+  intended_signals:
+  - coordinates
+  - elevation
+  - runway dimensions
+  - runway surface
+  redistribution_note: Attribution is still retained as provenance even though not required.
+  prepared_snapshot: '2026-09-01'
+  source_revision: bdd9fbc0a9c5e276366094a0298ab8f549eceffb
+- id: openstreetmap_airside
+  category: airport_geometry
+  status: prepared
+  official_url: https://www.openstreetmap.org/
+  acquisition_url: https://overpass-api.de/
+  license: ODbL-1.0
+  license_url: https://www.openstreetmap.org/copyright
+  expected_artifacts:
+  - airport-scoped OSM JSON extracts
+  intended_signals:
+  - stand coordinates
+  - runway geometry
+  - taxiway graph
+  - apron geometry
+  - shortest taxi distance
+  redistribution_note: Preserve OSM attribution and ODbL obligations for any derived database.
+  prepared_version: osm-airside-graph-v1
+  downloaded_snapshot: '2026-09-01'
+- id: xplane_scenery_gateway
+  category: airport_routing_topology
+  status: prepared
+  official_url: https://gateway.x-plane.com/
+  acquisition_url: https://gateway.x-plane.com/apiv1
+  license: GPL-2.0 for uploaded airport scenery
+  license_url: https://gateway.x-plane.com/docs/TermsAndConditionsForUploadOfAirportScenery.pdf
+  expected_artifacts:
+  - versioned apt.dat airport packages
+  - route nodes and edges
+  - active zones
+  - ramp starts
+  intended_signals:
+  - directed taxi routes
+  - taxiway names
+  - aircraft width constraints
+  - runway active zones
+  - ramp operation metadata
+  - stand-runway route distance
+  redistribution_note: Raw and prepared scenery remain ignored; retain Gateway, Laminar Research, and individual
+    contributor attribution when reproducing them.
+  prepared_versions:
+  - xplane-gateway-temporal-v1
+  - xplane-gateway-temporal-v2
+  temporal_rule: Use the latest approved snapshot at or before each movement timestamp; approval time is a causal
+    availability boundary, not an asserted AIRAC effective date.
+  semantic_limit: Community-authored planning topology is not an observation of the route taken by a real aircraft.
+- id: prc_data_challenge_2024
+  category: historical_taxiout_and_aircraft
+  status: prepared
+  official_url: https://ansperformance.eu/study/data-challenge/dc2024/
+  acquisition_url: https://doi.org/10.4121/8cb8484b-dbe7-4750-8b87-a5b1dbc621b4
+  license: CC-BY-4.0
+  license_url: https://journals.open.tudelft.nl/joas/article/download/8252/6395
+  expected_artifacts:
+  - historical flight table
+  - aircraft-type priors
+  - airport/month priors
+  intended_signals:
+  - historical taxi-out prior
+  - aircraft type
+  - wake category
+  - take-off-weight prior
+  - seasonality
+  redistribution_note: Retain dataset citation and CC-BY attribution; publish preparation code and prefer the DOI
+    over copying source files into Git.
+  prepared_version: prc2024-ccby4-openap2.4-v1
+- id: openap_aircraft
+  category: aircraft_characteristics
+  status: prepared
+  official_url: https://github.com/TUDelft-CNS-ATM/openap
+  acquisition_url: https://pypi.org/project/openap/
+  license: LGPL-3.0 toolkit; bundled model data carry GPL-3.0
+  license_url: https://github.com/TUDelft-CNS-ATM/openap/blob/master/LICENSE
+  expected_artifacts:
+  - aircraft type characteristic lookup
+  intended_signals:
+  - dimensions
+  - mass class
+  - engine count
+  - performance family
+  redistribution_note: Pin the package version, retain OpenAP attribution, and use only exact type matches; do not
+    use its cross-type synonym table for this task.
+  prepared_version: openap-2.4-direct-v1
+- id: faa_aircraft_characteristics
+  category: aircraft_characteristics
+  status: prepared
+  official_url: https://www.faa.gov/airports/engineering/aircraft_char_database
+  acquisition_url: https://www.faa.gov/airports/engineering/aircraft_char_database/aircraft_data
+  license: US federal public data; public-domain basis under 17 USC 105
+  license_url: https://catalog.data.faa.gov/about
+  expected_artifacts:
+  - versioned FAA aircraft characteristic table
+  intended_signals:
+  - dimensions
+  - mass
+  - engine class
+  - gear geometry
+  - wake category
+  - parking footprint
+  redistribution_note: Retain FAA attribution and public-data basis; use exact ICAO codes only and exclude the BADA
+    name, US registration counts, and FY24 operation counts.
+  prepared_version: faa-aircraft-2024-10-v1
+- id: derived_calendar
+  category: calendar
+  status: prepared
+  official_url: https://github.com/vacanza/holidays
+  acquisition_url: https://pypi.org/project/holidays/
+  license: MIT
+  license_url: https://github.com/vacanza/holidays/blob/dev/LICENSE
+  expected_artifacts:
+  - versioned airport-country holiday table
+  intended_signals:
+  - public holidays
+  - bridge days
+  - school-break proxy
+  - day type
+  redistribution_note: Record package version and generated calendar parameters.
+  prepared_version: holidays-0.103-v1

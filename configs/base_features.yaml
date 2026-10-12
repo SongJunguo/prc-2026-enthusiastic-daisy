@@ -1,0 +1,8 @@
+# Feature groups of the base cache that enter the model inputs (src/prc2026/modeling.py).
+feature_groups:
+- core
+- queue_v2_core
+- geometry
+- weather_v1
+- history_aircraft_v1
+- calendar
