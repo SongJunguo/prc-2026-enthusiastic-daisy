@@ -73,8 +73,11 @@ def main():
             frame = frame.copy()
             for column in ('pred', 'p_schedule', 'regressor'):
                 frame[column] = np.where(covered, frame[column].to_numpy(float), other[column].to_numpy(float))
+            other_run = json.loads((ROOT / 'artifacts/runs/final_models' / fallback[name] / 'run.json').read_text())
             rules.append({'rule': 'coverage_fallback', 'model': name, 'fallback_model': fallback[name], 'block': args.coverage_block,
-                          'covered_rows': int(covered.sum()), 'fallback_rows': int((~covered).sum())})
+                          'covered_rows': int(covered.sum()), 'fallback_rows': int((~covered).sum()),
+                          'fallback_seed': other_run['seed'], 'fallback_features': other_run['features'],
+                          'fallback_model_git_sha': other_run['source_git_sha']})
         pred = frame['pred'].to_numpy(float)
         if args.lirf_date_split:
             mask, value, rates = lirf_date_split(args.target, frame['p_schedule'].to_numpy(float), frame['regressor'].to_numpy(float))

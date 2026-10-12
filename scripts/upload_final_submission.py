@@ -10,6 +10,7 @@ with --replace."""
 import argparse
 import csv
 import datetime as dt
+import fcntl
 import json
 import os
 import subprocess
@@ -27,6 +28,8 @@ from prc2026.storage import TEAM_BUCKET, official_client
 OBJECT = 'enthusiastic-daisy_final.parquet'
 TEMPLATE = ROOT / 'data/official-final-2026-10-08/final_submitting.parquet'
 LOG = ROOT / 'reports/final_submission_log.csv'
+LOCK = Path.home() / '.cache/prc2026/enthusiastic-daisy-upload.lock'   # shared with the daily-board uploader
+CAPACITY_BYTES = 1_000_000_000
 ROWS = 670790
 
 
@@ -76,6 +79,12 @@ def main():
         print(json.dumps({**summary, 'uploaded': False}, indent=2)); return
     if summary['remote_before'] is not None and not args.replace:
         raise FileExistsError(f's3://{TEAM_BUCKET}/{OBJECT} exists; pass --replace to replace it')
+    used = sum(o.size for o in client.list_objects(TEAM_BUCKET, recursive=True) if o.object_name != OBJECT)
+    if used + summary['bytes'] > CAPACITY_BYTES:
+        raise ValueError(f'Team bucket would exceed its capacity: {used} + {summary["bytes"]} bytes')
+    LOCK.parent.mkdir(parents=True, exist_ok=True)
+    lock = LOCK.open('a+')
+    fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)        # raises when another upload is running
     client.fput_object(TEAM_BUCKET, OBJECT, str(source), content_type='application/vnd.apache.parquet')
     with tempfile.TemporaryDirectory() as folder:
         copy = Path(folder) / OBJECT

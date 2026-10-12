@@ -3,7 +3,8 @@
 Team `enthusiastic-daisy`, PRC Data Challenge 2026, final blind phase
 (`final_ranking` / `final_submitting`, 670,790 departures, January, February, June
 and July 2026). This document describes the end-to-end pipeline that produces the
-final predictions. The submitted configuration is listed under *Final configuration*.
+final predictions. The two configurations that were prepared for submission are listed under
+*Configurations*; which one is in the team bucket is stated in the README.
 
 ## Principles
 
@@ -183,7 +184,9 @@ Leave-month-out on 2025 labels: JJ (fit on Feb–Jun, Aug–Dec; hold out Januar
 and FJ (hold out February and June). Every mechanism was checked on both folds before
 use; results are reported for all rows and without the rollover-labelled rows, which
 dominate the fold RMSE (6 rows in JJ). `scripts/final_e2_schedule_mixture.py` runs one
-configuration on both folds and stores the held-out predictions.
+configuration on both folds and stores the held-out predictions; `scripts/score_validation_folds.py`
+applies the visible rules to them with edges and rates from the fold's training months and
+prints the fold RMSE reported under *Results*.
 
 ## Results
 
@@ -221,16 +224,23 @@ daily ATFM delay per airport, trajectory features for unmatched departures, flig
 regularity, schedule-state rates by flight number, callsign or stand, a finer coverage split
 by track quality, and blending the trajectory run with the fallback run on covered rows.
 
-## Final configuration
+## Configurations
 
-Five seeds (20261008, 20261011, 20261014, 20261017, 20261020) of two runs each:
+Both use the same models, rules and coverage fallback; they differ in two blocks and in the
+number of seeds.
 
-- trajectory run: `--extra arrtaxi deptaxi inb refile traj tprof tprofx nmw` (1,333 features);
-- fallback run: `--extra arrtaxi deptaxi inb refile nmw` (569 features), used for rows
-  without trajectory coverage.
+- **Three-seed safety configuration** (uploaded 2026-10-12 16:52 UTC; public analogue v834):
+  seeds 20261008, 20261011, 20261014; trajectory run
+  `--extra arrtaxi deptaxi inb refile traj tprof` (923 features), fallback run
+  `--extra arrtaxi deptaxi inb refile` (559 features).
+- **Five-seed configuration** (public analogue v838): seeds 20261008, 20261011, 20261014,
+  20261017, 20261020; trajectory run `--extra arrtaxi deptaxi inb refile traj tprof tprofx nmw`
+  (1,333 features), fallback run `--extra arrtaxi deptaxi inb refile nmw` (569 features).
+  It replaces the safety file only if v838 is scored below v834 (238.06), a rule fixed before
+  any five-seed result existed.
 
 Per seed the fallback is applied and the visible rules (`lirf_delay_zones`,
-`schedule_floor`) act on that seed's `p` and `R`; the five predictions are averaged, then
+`schedule_floor`) act on that seed's `p` and `R`; the seed predictions are averaged, then
 `present_rollover` and `join_bound` are applied.
 
 ## Reproduction
@@ -256,12 +266,15 @@ for seed in 20261008 20261011 20261014 20261017 20261020; do
   $PY scripts/final_train_predict.py $COMMON --seed $seed --name fallback_$seed \
     --extra arrtaxi deptaxi inb refile nmw
 done
-# final file in final_submitting order
+# prediction file of the five-seed configuration in final_submitting order
 ARGS=""; for seed in 20261008 20261011 20261014 20261017 20261020; do
   ARGS="$ARGS --model traj_$seed=0.2 --fallback traj_$seed=fallback_$seed"; done
 $PY scripts/final_write_submission.py --target final $ARGS --present-rollover --lirf-delay-zones \
   --schedule-floor --join-bound --output submissions/final/<file>.parquet
 ```
+
+The three-seed safety configuration is the same without `tprofx` and `nmw`, with the first three
+seeds and weights of one third.
 
 `scripts/train_final_runs.sh` holds the same loop with the run names used on the development
 machine (first seed without suffix, then `_s2` … `_s5`). One trajectory

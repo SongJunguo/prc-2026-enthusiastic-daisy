@@ -4,7 +4,7 @@ Taxi-out time prediction for departures at ten European airports
 (`TAXITIME_SEC_mvt = MVT_TIME_UTC_mvt − BLOCK_TIME_UTC_mvt`), final blind phase:
 670,790 departures of January, February, June and July 2026.
 
-This repository contains the pipeline that produced `enthusiastic-daisy_final.parquet`
+This repository contains the pipeline that produces `enthusiastic-daisy_final.parquet`
 and nothing else. It is fitted on the 2025 training labels only.
 
 - **Method, design decisions and results:** [`docs/method.md`](docs/method.md)
@@ -26,15 +26,29 @@ and nothing else. It is fitted on the 2025 training labels only.
 4. Open ADS-B.lol ground tracks of the departing airframe give the observed push-back and
    taxi start. Rows without a track are predicted by a second model trained without the
    track features.
-5. Five seeds of XGBoost + LightGBM + CatBoost + TabM are averaged.
+5. Several seeds of XGBoost + LightGBM + CatBoost + TabM are averaged.
+
+## Submitted file
+
+State at this commit: `enthusiastic-daisy_final.parquet` in the team bucket was uploaded on
+2026-10-12 16:52 UTC and is the **three-seed safety configuration**: blocks
+`arrtaxi deptaxi inb refile traj tprof`, fallback runs with `arrtaxi deptaxi inb refile`, seeds
+20261008, 20261011, 20261014 (`bash scripts/write_final_file.sh three-seed`). Its public-board
+analogue is v834 (RMSE 238.06).
+
+The **five-seed configuration** adds the blocks `nmw` and `tprofx` and the seeds 20261017 and
+20261020 (`bash scripts/write_final_file.sh five-seed`). Under a rule fixed on 2026-10-12, before
+any five-seed result existed, it replaces the safety file only if its public-board analogue
+(v838) is scored below 238.06; otherwise the safety file stays. This section is updated when
+that is decided.
 
 ## Results
 
 | | RMSE (s) |
 |---|---:|
 | Public board, January/July 2026, this pipeline (v836, one seed) | 236.88 |
-| 2025 leave-month-out, hold out January + July (one XGBoost mixture, all rules) | 296.94 |
-| 2025 leave-month-out, hold out February + June | 261.46 |
+| 2025 leave-month-out, hold out January + July (one XGBoost mixture with all blocks, visible rules applied) | 296.94 |
+| 2025 leave-month-out, hold out February + June (same) | 261.46 |
 
 The step-by-step public-board history of the pipeline (249.53 → 236.88) is in
 [`docs/method.md`](docs/method.md#results).
@@ -125,10 +139,15 @@ All commands run from the repository root with `PYTHONPATH=src`.
 **2. ADS-B.lol history** (about 480 daily archives, several days of download and decoding):
 `acquire_full_history_v1.py` and `rebuild_full_history_v1.py` (January/July 2025 and 2026),
 `supplement_full_history_training_v2.py` (the other 2025 months),
-`final_v3_trajectory_acquire.py` (February/June 2026). The archives are the public GitHub release
-assets listed with their sizes in `configs/full_history_*_assets.json`; on the development
-machine large transfers were routed through a local proxy client's direct listener
-(`direct_source_session.py`), which another machine does not need.
+`final_v3_trajectory_acquire.py` (February/June 2026). The archives are public GitHub release
+assets: those of 2025 and January/July 2026 are listed with their sizes in
+`configs/full_history_*_assets.json`, those of February/June 2026 are selected from
+`configs/adsblol/preferred_2026.txt` (a copy of ADS-B.lol's list of preferred releases).
+**Not portable as written:** the download scripts route large transfers through a direct
+listener of the proxy client on the development machine (Mihomo/Clash, configuration at
+`~/clashctl/resources/runtime.yaml`, see `src/prc2026/direct_source_session.py`) and stop
+without it. On another machine the sessions created there have to be replaced by plain HTTP
+sessions; decoding and everything after it do not depend on the listener.
 
 **3. Base model inputs** (483 columns per departure, same contract for all populations):
 
@@ -152,19 +171,28 @@ python scripts/final_v3_assemble_inputs.py
 for s in arr_taxi_context dep_taxi_context refile_context inbound_context nm_witness; do
   python scripts/build_$s.py; done
 for b in traj tprof tprofx; do python scripts/build_traj_events.py --block $b; done
-bash scripts/train_final_runs.sh      # ten runs: five seeds x (trajectory run, fallback run)
-bash scripts/write_final_file.sh      # submissions/final/enthusiastic-daisy_final.parquet
+bash scripts/train_final_runs.sh             # ten runs: five seeds x (trajectory run, fallback run)
+bash scripts/write_final_file.sh five-seed   # or three-seed; writes submissions/final/final_*.parquet
 ```
 
-Leave-month-out validation of a configuration on 2025 (January+July and February+June held out):
+The shell scripts call `python`; set `PYTHON=/path/to/python` to use another interpreter.
+
+Leave-month-out validation of a configuration on 2025 (January+July and February+June held
+out). The first command fits one XGBoost mixture per fold and stores the held-out predictions;
+the second applies the visible rules to them, with all edges and rates from the training months
+of the fold, and prints the numbers of the table above:
 
 ```bash
 python scripts/final_e2_schedule_mixture.py --class-weight delta2 --rollover-state \
   --extra arrtaxi deptaxi inb refile traj tprof tprofx nmw --name check
+python scripts/score_validation_folds.py --name check
 ```
 
-**What was re-run from this tree.** Step 4 was checked from this repository against the
-stored inputs: the five context blocks and sampled airport-months of the three trajectory
-blocks are reproduced value for value, and `write_final_file.sh` on the stored runs
-reproduces the submitted file exactly. Steps 1–3 were run once during development with the
-same code; they are listed with the versions that the later steps read.
+**What was re-run from this tree.** `scripts/check_reproduction.py` compares this tree with
+the stored inputs and runs of the development machine. For the three-seed configuration it
+passes (output in `docs/reproduction_check.txt`): all modules import, all scripts answer `--help`, `write_final_file.sh three-seed` on the
+stored runs reproduces the uploaded file value for value, the five context blocks of the public
+file and nine sampled airport-months of the three trajectory blocks are reproduced value for
+value. `score_validation_folds.py` reproduces the fold numbers from the stored held-out
+predictions. Not re-run from this tree: the downloads and base model inputs (steps 1–3, run once
+during development with the same code) and the model fits themselves.

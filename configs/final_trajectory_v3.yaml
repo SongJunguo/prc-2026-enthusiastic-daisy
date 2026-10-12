@@ -7,7 +7,7 @@ source_id: adsblol_historical_adsb
 year: 2026
 months: [2, 6]
 expected_dates: 58
-preferred_index: artifacts/audits/full_history_rebuild_2026-09-27/metadata/preferred_2026.txt
+preferred_index: configs/adsblol/preferred_2026.txt
 release_metadata: artifacts/audits/full_history_rebuild_2026-09-27/metadata
 run_root: artifacts/runs/final_trajectory_v3
 raw_root: data/external/raw/adsblol_historical_adsb/final-trajectory-v3

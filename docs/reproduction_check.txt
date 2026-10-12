@@ -1,0 +1,25 @@
+scripts/check_reproduction.py --configuration three-seed --reference <uploaded enthusiastic-daisy_final.parquet>
+run on the development machine, 2026-10-12T18:26Z, tree of the commit that adds this file
+
+PASS import every module of src/prc2026
+PASS --help of every command-line script
+PASS three-seed file written from the stored runs equals the reference file
+PASS arr_taxi_context block of the public file
+PASS dep_taxi_context block of the public file
+PASS refile_context block of the public file
+PASS inbound_context block of the public file
+PASS nm_witness block of the public file
+PASS trajectory part public LSZH 2026-01 matched (9358 rows)
+PASS trajectory part public LSZH 2026-01 profile (9358 rows)
+PASS trajectory part public LSZH 2026-01 profilex (9358 rows)
+PASS trajectory part train2025 EDDM 2025-03 matched (11712 rows)
+PASS trajectory part train2025 EDDM 2025-03 profile (11712 rows)
+PASS trajectory part train2025 EDDM 2025-03 profilex (11712 rows)
+PASS trajectory part final EHAM 2026-02 matched (16158 rows)
+PASS trajectory part final EHAM 2026-02 profile (16158 rows)
+PASS trajectory part final EHAM 2026-02 profilex (16158 rows)
+ALL PASS
+
+scripts/score_validation_folds.py on the stored held-out predictions of the configuration with all blocks:
+{"fold": "JJ", "held_out_months": [1, 7], "rows": 344419, "rmse_stored_mixture": 322.15, "rmse_with_rules": 296.94, "rmse_with_rules_excluding_rollover_labels": 256.70, "rollover_labelled_rows": 6}
+{"fold": "FJ", "held_out_months": [2, 6], "rows": 326874, "rmse_stored_mixture": 262.10, "rmse_with_rules": 261.46, "rmse_with_rules_excluding_rollover_labels": 224.63, "rollover_labelled_rows": 2}
