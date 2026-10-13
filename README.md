@@ -241,5 +241,6 @@ on the stored runs reproduces the delivered month combination value for value ag
 the three trajectory blocks for public LSZH January 2026, training EDDM March 2025 and final
 EHAM February 2026 are reproduced value for value. The earlier `score_validation_folds.py`
 outputs from the stored held-out predictions are retained at the end of the check record.
-Not re-run from this tree: the downloads and base model inputs (steps 1–3, run once during
-development with the same code) and the model fits themselves.
+Complete external-data acquisition, base model-input builds (steps 1–3) and model fits were
+performed during development and were not re-run by this check. The portable download
+transport has a separate bounded check in `docs/download_transport_check.txt`.

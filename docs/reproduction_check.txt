@@ -1,5 +1,6 @@
 scripts/check_reproduction.py --configuration submitted --reference ../PRC-2026/submissions/final/final_candidate_jj_single_fj_five.parquet
 run in ubuntu-kvm with /home/sjg/miniconda3/envs/prc2026_gpu/bin/python, 2026-10-13; ALL PASS confirmed at 06:20:48 UTC
+Source tree: 4c5d75e plus the v838 selection-note update; check_reproduction.py unchanged.
 
 PASS import every module of src/prc2026
 PASS --help of every command-line script
