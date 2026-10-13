@@ -42,7 +42,8 @@ are predicted by fallback runs with `arrtaxi deptaxi inb refile nmw`.
 
 **The January/July choice was made by public-board score.** On the board the single run scored
 236.8756 (v836), the three-seed average of the same configuration 237.8765 (v837), and the
-five-seed average 237.8486 (v838). Single seeds differ by 0.5–1.5 s there, so this says nothing
+five-seed average 237.8486 (v838); the second seed alone scored 239.0009 (v840). Single seeds
+differ by up to about 2 s there, so this says nothing
 about which seed is the better model; but the board scores the same January/July departures
 as those in the final file, and on 2026-10-13 the team decided
 to keep the run that scored best for those rows. For February and June no score exists and the
@@ -51,26 +52,32 @@ public-board score decides between predictions. `scripts/final_combine_months.py
 files and records the choice in the manifest.
 
 State at this commit (2026-10-13): the team bucket holds `enthusiastic-daisy_final.parquet`,
-uploaded at 2026-10-13 06:06:58 UTC from
-`submissions/final/final_candidate_jj_single_fj_five.parquet` (670,790 rows, 8,641,689 bytes).
-It is the month combination described above. The five-seed public-chain file scored 237.8486
-(v838), above the single run. The January/July predictions of the delivered final-chain file,
-taken by `MVT_ID` into public-board order, scored 236.9858 (v839). Final inputs include export
-jitter, so v839 checks the delivered predictions rather than re-uploading v836; it is not a
-four-month final blind score.
+uploaded at 2026-10-13 17:55:57 UTC from
+`submissions/final/final_candidate_jj_single_fj_five_sd.parquet` (670,790 rows, 8,641,689 bytes).
+It is the month combination described above. It replaces the file uploaded at 06:06:58 UTC and
+differs from it in one row: a LIRF departure of 22 January 2026 (`MVT_ID` 202687258), which the
+same-date condition of the delay zones (`docs/method.md`, *Structure of the provided tables*,
+item 4) moves from 64,838 s to 52,207 s. The condition was found on 2026-10-13 from the 2025
+labels; on the public board the single run with it scored 236.1026 (v841) against 236.8756
+without it (v836). The January/July predictions of the earlier delivered final-chain file,
+taken by `MVT_ID` into public-board order, had scored 236.9858 (v839). Final inputs include
+export jitter, so v839 checked delivered predictions rather than re-uploading v836; none of
+these is a four-month final blind score.
 
 ## Results
 
 | | RMSE (s) |
 |---|---:|
-| Public board, January/July 2026, this pipeline, one seed (v836) | 236.88 |
+| Public board, January/July 2026, this pipeline, one seed, with the same-date condition of the LIRF delay zones (v841) | 236.1026 |
+| Public board, the same seed without that condition (v836) | 236.88 |
+| Public board, same configuration, second seed alone (v840) | 239.0009 |
 | Public board, same configuration, average of three seeds (v837) | 237.88 |
 | Public board, same configuration, average of five seeds, public-chain (v838) | 237.8486 |
-| Public board, January/July rows of the delivered final-chain file, matched by MVT_ID (v839) | 236.9858 |
+| Public board, January/July rows of the final-chain file delivered before the same-date condition, matched by MVT_ID (v839) | 236.9858 |
 | 2025 leave-month-out, hold out January + July (one XGBoost mixture with all blocks, visible rules applied) | 296.94 |
 | 2025 leave-month-out, hold out February + June (same) | 261.46 |
 
-The step-by-step public-board history of the pipeline (249.53 → 236.88) is in
+The step-by-step public-board history of the pipeline (249.53 → 236.10) is in
 [`docs/method.md`](docs/method.md#results).
 
 The team's best entry on the public board (v807, 234.86) is **not** from this pipeline. It
@@ -237,7 +244,8 @@ the stored inputs and runs of the development machine. On 2026-10-13 the `submit
 configuration passed all 17 checks (`ALL PASS`, output in `docs/reproduction_check.txt`): all
 modules import, all command-line scripts answer `--help`, and `write_final_file.sh submitted`
 on the stored runs reproduces the delivered month combination value for value against
-`final_candidate_jj_single_fj_five.parquet`. The five context blocks of the public file and
+`final_candidate_jj_single_fj_five_sd.parquet`, the file uploaded at 17:55:57 UTC (the check
+was repeated at 18:00 UTC after the same-date condition). The five context blocks of the public file and
 the three trajectory blocks for public LSZH January 2026, training EDDM March 2025 and final
 EHAM February 2026 are reproduced value for value. The earlier `score_validation_folds.py`
 outputs from the stored held-out predictions are retained at the end of the check record.

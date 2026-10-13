@@ -19,7 +19,7 @@ if [ "$CONFIGURATION" = submitted ]; then
   bash scripts/write_final_file.sh five-seed
   exec $PY scripts/final_combine_months.py --january-july submissions/final/final_single_run.parquet \
     --february-june submissions/final/final_five_seeds.parquet \
-    --selection-note "public board (January/July 2026): v836 single run seed 20261008 236.8756; v837 three seeds 237.8765; v838 five seeds 237.8486" \
+    --selection-note "public board (January/July 2026): v836 single run seed 20261008 236.8756; v837 three seeds 237.8765; v838 five seeds 237.8486; v841 single run with the same-date rule of the LIRF wrap zone 236.1026" \
     --output submissions/final/final_submitted.parquet
 fi
 case "$CONFIGURATION" in

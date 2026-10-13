@@ -18,7 +18,8 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path[:0] = [str(ROOT / 'src')]
 import numpy as np
 import pandas as pd
-from prc2026.final_pipeline import DAY_SEC, ID, PRESENT_ROLLOVER_SEC, ROLLOVER_BAND_SEC, TARGET, TIME, _operator_prefix
+from prc2026.final_pipeline import (DAY_SEC, ID, LIRF_TZ, OFFBLOCK_LEAD_SEC, PRESENT_ROLLOVER_SEC, ROLLOVER_BAND_SEC, TARGET, TIME,
+                                    _operator_prefix)
 
 LATE_SEC = 21600.0          # MVT - SCHED above which the LIRF unmatched group follows the delay zones
 JITTER_SEC = 12.0           # two exports, +-6 s each
@@ -41,6 +42,9 @@ def departures_2025():
     out['rollover'] = ~out.schedule & ((out.y - DAY_SEC).abs() <= ROLLOVER_BAND_SEC)
     out['unmatched'] = d.AOBT_3_flt.isna()
     out['lirf_unmatched'] = out.airport.eq('LIRF') & out.unmatched
+    mvt = pd.to_datetime(d[TIME], utc=True); sched = pd.to_datetime(d.SCHED_TIME_UTC_mvt, utc=True)
+    off_date = (mvt - pd.Timedelta(seconds=OFFBLOCK_LEAD_SEC)).dt.tz_convert(LIRF_TZ).dt.normalize()
+    out['cross'] = (off_date - sched.dt.tz_convert(LIRF_TZ).dt.normalize()).dt.days >= 1   # off-block on a later Rome date
     return out
 
 
@@ -61,8 +65,11 @@ def delay_zones(train, x):
     p_operator = ((x.operator.map(k).fillna(0) + 2 * prior) / (x.operator.map(n).fillna(0) + 2)).to_numpy(float)
     p_wrap = (x.p + rate(wrap.schedule.sum(), len(wrap)) + p_operator) / 3
     in_dead = (x.sd > lower) & (x.sd <= upper); in_wrap = (x.sd > upper) & (x.sd <= top)
-    p = np.where(in_dead, rate(dead.schedule.sum(), len(dead)), np.where(in_wrap, p_wrap, x.p))
-    q = np.where(x.sd > upper, rate(wrap.rollover[~wrap.schedule].sum(), (~wrap.schedule).sum()),
+    same = tr[(tr.sd > lower) & (tr.sd <= top) & ~tr.cross]               # same-date rows cannot wrap
+    in_same = in_wrap & ~x.cross
+    p = np.where(in_dead, rate(dead.schedule.sum(), len(dead)),
+                 np.where(in_same, rate(same.schedule.sum(), len(same)), np.where(in_wrap, p_wrap, x.p)))
+    q = np.where((x.sd > upper) & ~in_same, rate(wrap.rollover[~wrap.schedule].sum(), (~wrap.schedule).sum()),
                  rate(below.rollover[~below.schedule].sum(), (~below.schedule).sum()))
     return p * x.sd + (1 - p) * (x.r + q * DAY_SEC)
 

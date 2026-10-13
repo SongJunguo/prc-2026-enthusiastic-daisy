@@ -108,6 +108,15 @@ prediction file is written.
    unmatched rows with an ordinary delay (1 h to 6.4 h, two pseudo-rows at the overall share).
    Edges and rates use `(k + 0.5) / (n + 1)` on 2025 labels.
 
+   A wrap needs the off-block to fall on a later Rome calendar date than SCHED: all 12 LIRF
+   rollover rows without NM columns do, and none of the 727 same-date rows that are not
+   schedule-recorded is a rollover. A row of the third zone whose off-block (MVT − 15 min)
+   lies on the scheduled date therefore cannot be a rollover: its `p` is the schedule-recorded
+   share of the same-date rows above 23,039 s (19 of 19, rate 0.975) and its rollover rate
+   that of the rows below the third zone. This condition belonged to the calendar-date split
+   that the zones replaced on 2026-10-11 and was missing in the third zone until 2026-10-13.
+   It changes one row of the public file and the same flight in the final file.
+
 ## Models
 
 - **Features.** 483 base columns per departure, identical for 2025 and 2026:
@@ -223,13 +232,16 @@ Daily public board (January/July 2026, 344,841 departures), full models:
 | v836 | v835 + `tprofx`, one seed | 236.88 |
 | v837 | v836, three seeds | 237.88 |
 | v838 | v836, five seeds, public-chain predictions | 237.8486 |
-| v839 | January/July rows of the delivered final-chain file, taken by MVT_ID into public-board order | 236.9858 |
+| v839 | January/July rows of the final-chain file delivered at that time, taken by MVT_ID into public-board order | 236.9858 |
+| v840 | v836 configuration, second seed (20261011) alone | 239.0009 |
+| v841 | v836 + same-date condition of the LIRF delay zones (one row differs) | 236.1026 |
 
-v839 checks the delivered final predictions, whose inputs include the final export jitter;
-it is not a re-upload of v836 or a four-month final blind score.
+v839 checked the final-chain predictions delivered at that time, whose inputs include the
+final export jitter; it is not a re-upload of v836 or a four-month final blind score. The
+file delivered now differs from it in the one row that the same-date condition changes.
 
-Single seeds differ by 0.5–1 s on the public board (the three-seed average of v834 scores
-above its first seed), so v835 and v836 show that `nmw` and `tprofx` do no harm, not that
+Single seeds differ by 0.5–2 s on the public board (the three-seed average of v834 scores
+above its first seed; the second seed alone, v840, scores 2.1 s above the first), so v835 and v836 show that `nmw` and `tprofx` do no harm, not that
 they help; the 2025 folds say the same. Ideas that did not improve the folds were left out
 and their code is not in this repository: counts of other unmatched delayed departures,
 daily ATFM delay per airport, trajectory features for unmatched departures, flight
@@ -246,18 +258,19 @@ All configurations use the same models, rules and coverage fallback.
   - February/June rows: average of the seeds 20261008, 20261011, 20261014, 20261017, 20261020
     (`write_final_file.sh five-seed`; public analogue of the average: v838, 237.8486).
   - January/July rows: the run with seed 20261008 alone (`write_final_file.sh single-run`;
-    public analogue v836, 236.88).
+    public analogue v841, 236.10; v836 before the same-date condition of the delay zones, 236.88).
 
   The single run is used for January/July because it scored below the seed average of the same
   configuration on the public board (v837, three seeds: 237.8765; v838, five seeds: 237.8486),
   and the board scores the same departures as the January/July rows of the final file.
-  Single-seed scores scatter by 0.5–1.5 s, so the choice is a
+  Single-seed scores scatter by up to about 2 s (the second seed alone: v840, 239.0009), so the choice is a
   selection on the scored rows and no evidence that this seed is the better model; for
   February/June, where nothing is scored, the seed average is kept because averaging lowers the
   expected error. The five-seed average scored above the single run, so it was not used for
   all four months. `scripts/final_combine_months.py` takes the rows of each month group from
-  the two files unchanged. The delivered January/July subset scored 236.9858 as v839 on the
-  public board after mapping the final-chain predictions by MVT_ID.
+  the two files unchanged. The January/July subset of the file delivered before the same-date
+  condition scored 236.9858 as v839 on the public board after mapping the final-chain
+  predictions by MVT_ID.
 - **Three-seed safety configuration** (first upload, 2026-10-12 16:52 UTC; public analogue
   v834, 238.06): seeds 20261008, 20261011, 20261014; trajectory run
   `--extra arrtaxi deptaxi inb refile traj tprof` (923 features), fallback run

@@ -258,6 +258,11 @@ def lirf_delay_zones(target, p, r):
     ordinary delay (1 h to L; two pseudo-rows at the overall share).  Elsewhere p is
     unchanged.  Rows up to T use the rollover rate of non-schedule rows below T, rows above
     T that of the wrap zone.
+    A wrap needs the off-block to fall on a later Rome calendar date than SCHED (every LIRF
+    rollover row of 2025 does; no same-date non-schedule row is one).  A wrap-zone row whose
+    off-block (MVT - 15 min) lies on the scheduled date therefore cannot be a rollover: it
+    takes the schedule-recorded share of the same-date rows above L (2025: 19 of 19) and the
+    rollover rate of the rows below T (2026-10-13).
     p, r: classifier probability and ordinary-taxi regression in target template order.
     Returns (mask, value, parameters) with value = p'·(MVT − SCHED) + (1 − p')·(r + q'·86,400)."""
     raw = sorted((ROOT / 'data/raw').glob('training_2025-*.parquet'))
@@ -266,8 +271,8 @@ def lirf_delay_zones(target, p, r):
     gap = (t.BLOCK_TIME_UTC_mvt - t.SCHED_TIME_UTC_mvt).dt.total_seconds().to_numpy()
     sched_state = (np.abs(gap) <= 6) | (np.abs(np.abs(gap) - 60) <= 6)
     roll = rollover_state(t[TARGET].to_numpy(float), sched_state.astype(int) * 1.0)
-    miss, sd, _ = _lirf_late_missing(t)
-    sched_state, roll, sd, oper = sched_state[miss], roll[miss], sd[miss], _operator_prefix(t.FLIGHT_mvt)[miss]
+    miss, sd, cross = _lirf_late_missing(t)
+    sched_state, roll, sd, cross, oper = sched_state[miss], roll[miss], sd[miss], cross[miss], _operator_prefix(t.FLIGHT_mvt)[miss]
 
     def rate(k, n):
         return float((k + 0.5) / (n + 1.0))
@@ -286,19 +291,22 @@ def lirf_delay_zones(target, p, r):
          'q_below': rate(roll[below & ~sched_state].sum(), (below & ~sched_state).sum()),
          'operator_prior': prior, 'operator_base_rows': int(base.sum()),
          'train_rows_dead': int(dead.sum()), 'train_rows_wrap': int(wrap.sum())}
+    same = (sd > lower) & (sd <= top) & ~cross
+    z.update({'p_same_date': rate(sched_state[same].sum(), same.sum()), 'train_rows_same_date': int(same.sum())})
 
     _, template_path, _ = TARGETS[target]
     ids = pd.read_parquet(template_path, columns=[ID])[ID].to_numpy()
     d = pd.read_parquet(RANKING_SOURCES[target], columns=cols[:6], filters=[('PHASE_mvt', '==', 'DEP')]).set_index(ID).reindex(ids)
-    miss, sd, _ = _lirf_late_missing(d)
+    miss, sd, cross = _lirf_late_missing(d)
     mask = miss & (sd > PRESENT_ROLLOVER_SEC)
     oper = _operator_prefix(d.FLIGHT_mvt)
     p_oper = ((oper.map(by_oper['sum']).fillna(0.0) + 2.0 * prior) / (oper.map(by_oper['size']).fillna(0.0) + 2.0)).to_numpy(float)
     dead = (sd > lower) & (sd <= upper); wrap = (sd > upper) & (sd <= top)
-    p2 = np.where(dead, z['p_dead'], np.where(wrap, (p + z['p_wrap'] + p_oper) / 3.0, p))
-    q2 = np.where(sd > upper, z['q_wrap'], z['q_below'])
+    same = wrap & ~cross
+    p2 = np.where(dead, z['p_dead'], np.where(same, z['p_same_date'], np.where(wrap, (p + z['p_wrap'] + p_oper) / 3.0, p)))
+    q2 = np.where((sd > upper) & ~same, z['q_wrap'], z['q_below'])
     value = p2 * sd + (1 - p2) * (r + q2 * DAY_SEC)
-    z.update({'rows_dead': int((mask & dead).sum()), 'rows_wrap': int((mask & wrap).sum()),
+    z.update({'rows_dead': int((mask & dead).sum()), 'rows_wrap': int((mask & wrap).sum()), 'rows_wrap_same_date': int((mask & same).sum()),
               'wrap_p_operator': np.round(p_oper[mask & wrap], 3).tolist(), 'wrap_p': np.round(p2[mask & wrap], 3).tolist()})
     return mask, value, z
 
