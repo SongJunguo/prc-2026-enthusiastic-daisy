@@ -143,11 +143,27 @@ All commands run from the repository root with `PYTHONPATH=src`.
 assets: those of 2025 and January/July 2026 are listed with their sizes in
 `configs/full_history_*_assets.json`, those of February/June 2026 are selected from
 `configs/adsblol/preferred_2026.txt` (a copy of ADS-B.lol's list of preferred releases).
-**Not portable as written:** the download scripts route large transfers through a direct
-listener of the proxy client on the development machine (Mihomo/Clash, configuration at
-`~/clashctl/resources/runtime.yaml`, see `src/prc2026/direct_source_session.py`) and stop
-without it. On another machine the sessions created there have to be replaced by plain HTTP
-sessions; decoding and everything after it do not depend on the listener.
+**Not portable as written.** The development machine sits behind a proxy client (Mihomo/Clash,
+configuration at `~/clashctl/resources/runtime.yaml`). The ADS-B.lol download scripts send
+large transfers through a temporary direct listener of that client and stop without it. On
+another machine these parts have to be replaced:
+
+- `scripts/acquire_july_archive_v259.py`: `DirectListener` creates and removes the listener
+  through the client's control interface, `asset_session` is a `requests` session through the
+  listener, `route_lines` reads the client's journal as a record of the route taken. A plain
+  `requests.Session()` replaces the session; the other two have no counterpart.
+- `src/prc2026/full_history_direct_transport.py`: `TransferState.manager` opens a
+  `urllib3.ProxyManager` through the listener to the release CDN addresses of the configuration,
+  which the calling scripts first compare with the client's DNS answer, and `redirect_url`
+  resolves the release redirect through the client's ordinary port. A `urllib3.PoolManager`
+  with the same TLS host check replaces both.
+- `scripts/final_v3_trajectory_acquire.py`: with `use_public_release_api: true` (the setting in
+  `configs/final_trajectory_v3.yaml`) it requires the listener port in `PRC_FINAL_DIRECT_PORT`.
+
+`src/prc2026/direct_source_session.py`, used by the ERA5 and GHCNh downloads, already uses plain
+sessions when `PRC_FINAL_DIRECT_PORT` is not set. The full-history scripts also call
+`run_guards.clean_pushed_head`, which requires a clean checkout whose HEAD equals its upstream
+branch. Decoding and every later step do not depend on the listener.
 
 **3. Base model inputs** (483 columns per departure, same contract for all populations):
 
