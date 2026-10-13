@@ -8,7 +8,7 @@ What is checked (it needs the data, feature and run folders of the development m
   4. the three trajectory blocks rebuilt for sampled airport-months equal the stored parts.
 What is not checked: the downloads, the base model inputs (README steps 1-3) and the model fits.
 
-    python scripts/check_reproduction.py --configuration three-seed --reference <uploaded file>
+    python scripts/check_reproduction.py --configuration submitted --reference <uploaded file>
 """
 import argparse
 import importlib
@@ -44,7 +44,7 @@ def same(a, b):
 
 def main():
     a = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    a.add_argument('--configuration', choices=['three-seed', 'five-seed'], required=True)
+    a.add_argument('--configuration', choices=['submitted', 'single-run', 'five-seed', 'three-seed'], required=True)
     a.add_argument('--reference', required=True, help='Local copy of the uploaded prediction file')
     a.add_argument('--quick', action='store_true', help='Only one airport-month of trajectory parts')
     args = a.parse_args()
@@ -66,14 +66,17 @@ def main():
                 bad.append(f.name)
     report('--help of every command-line script', not bad, '; '.join(bad))
 
-    name = {'three-seed': 'final_three_seeds', 'five-seed': 'final_five_seeds'}[args.configuration]
-    out = ROOT / f'submissions/final/{name}.parquet'
-    existed = out.exists()
+    names = {'submitted': ['final_submitted', 'final_single_run', 'final_five_seeds'], 'single-run': ['final_single_run'],
+             'five-seed': ['final_five_seeds'], 'three-seed': ['final_three_seeds']}[args.configuration]
+    written = [ROOT / f'submissions/final/{name}.parquet' for name in names]
+    out = written[0]
+    existed = [path.exists() for path in written]
     run = subprocess.run(['bash', 'scripts/write_final_file.sh', args.configuration], capture_output=True, text=True, env=env, cwd=ROOT)
     good = run.returncode == 0 and pd.read_parquet(out).equals(pd.read_parquet(args.reference))
     report(f'{args.configuration} file written from the stored runs equals the reference file', good, run.stderr[-200:] if run.returncode else '')
-    if not existed:
-        out.unlink(missing_ok=True); out.with_suffix('.manifest.json').unlink(missing_ok=True)
+    for path, before in zip(written, existed):
+        if not before:
+            path.unlink(missing_ok=True); path.with_suffix('.manifest.json').unlink(missing_ok=True)
 
     for module, folder in BLOCKS:
         mod = importlib.import_module('prc2026.' + module)

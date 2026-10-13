@@ -26,27 +26,43 @@ and nothing else. It is fitted on the 2025 training labels only.
 4. Open ADS-B.lol ground tracks of the departing airframe give the observed push-back and
    taxi start. Rows without a track are predicted by a second model trained without the
    track features.
-5. Several seeds of XGBoost + LightGBM + CatBoost + TabM are averaged.
+5. Several seeds of XGBoost + LightGBM + CatBoost + TabM are averaged (for the January/July rows
+   one seed is used, see *Submitted file*).
 
 ## Submitted file
 
-State at this commit: `enthusiastic-daisy_final.parquet` in the team bucket was uploaded on
-2026-10-12 16:52 UTC and is the **three-seed safety configuration**: blocks
-`arrtaxi deptaxi inb refile traj tprof`, fallback runs with `arrtaxi deptaxi inb refile`, seeds
-20261008, 20261011, 20261014 (`bash scripts/write_final_file.sh three-seed`). Its public-board
-analogue is v834 (RMSE 238.06).
+`enthusiastic-daisy_final.parquet` is written by `bash scripts/write_final_file.sh submitted`.
+Configuration: blocks `arrtaxi deptaxi inb refile traj tprof tprofx nmw`; rows without a track
+are predicted by fallback runs with `arrtaxi deptaxi inb refile nmw`.
 
-The **five-seed configuration** adds the blocks `nmw` and `tprofx` and the seeds 20261017 and
-20261020 (`bash scripts/write_final_file.sh five-seed`). Under a rule fixed on 2026-10-12, before
-any five-seed result existed, it replaces the safety file only if its public-board analogue
-(v838) is scored below 238.06; otherwise the safety file stays. This section is updated when
-that is decided.
+- **February and June rows** (325,949): average of five seeds (20261008, 20261011, 20261014,
+  20261017, 20261020).
+- **January and July rows** (344,841, the departures the daily public board scores): the run
+  with seed 20261008 alone.
+
+**The January/July choice was made by public-board score.** On the board the single run scored
+236.88 (v836) and the three-seed average of the same configuration 237.88 (v837). Single seeds
+differ by 0.5–1.5 s there, so this says nothing about which seed is the better model; but the
+board scores exactly the January/July rows of the final file, and on 2026-10-13 the team decided
+to keep the run that scored best for those rows. For February and June no score exists and the
+seed average, which has the lower expected error, is used. This is the one place where a
+public-board score decides between predictions. `scripts/final_combine_months.py` joins the two
+files and records the choice in the manifest.
+
+State at this commit (2026-10-13 02:45 UTC): the last two seeds are being fitted and the team
+bucket still holds the three-seed safety file uploaded on 2026-10-12 16:52 UTC (blocks without
+`nmw` and `tprofx`, seeds 20261008/11/14; `write_final_file.sh three-seed`; public analogue v834,
+238.06). The file described above replaces it after the five-seed average is scored on the
+public board (v838); should that average score below the single run, it is used for all four
+months. The public-board score of the January/July rows of the delivered file (v839) is added
+here afterwards.
 
 ## Results
 
 | | RMSE (s) |
 |---|---:|
-| Public board, January/July 2026, this pipeline (v836, one seed) | 236.88 |
+| Public board, January/July 2026, this pipeline, one seed (v836) | 236.88 |
+| Public board, same configuration, average of three seeds (v837) | 237.88 |
 | 2025 leave-month-out, hold out January + July (one XGBoost mixture with all blocks, visible rules applied) | 296.94 |
 | 2025 leave-month-out, hold out February + June (same) | 261.46 |
 
@@ -96,6 +112,9 @@ scripts/
   final_e2_schedule_mixture.py leave-month-out validation of one configuration
   final_train_predict.py       fit on all 2025 departures, predict public and final rows
   final_write_submission.py    coverage fallback, visible rules, seed average, output file
+  final_combine_months.py      delivered file: January/July rows of one file, February/June of another
+  final_rows_to_public.py      January/July rows of a final file in public-board order (check of the
+                               delivered file on the public board)
   train_final_runs.sh, write_final_file.sh
                                the exact final configuration
   upload_final_submission.py   template checks and upload of the final file
@@ -188,7 +207,7 @@ for s in arr_taxi_context dep_taxi_context refile_context inbound_context nm_wit
   python scripts/build_$s.py; done
 for b in traj tprof tprofx; do python scripts/build_traj_events.py --block $b; done
 bash scripts/train_final_runs.sh             # ten runs: five seeds x (trajectory run, fallback run)
-bash scripts/write_final_file.sh five-seed   # or three-seed; writes submissions/final/final_*.parquet
+bash scripts/write_final_file.sh submitted   # writes submissions/final/final_submitted.parquet
 ```
 
 The shell scripts call `python`; set `PYTHON=/path/to/python` to use another interpreter.

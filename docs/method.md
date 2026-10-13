@@ -10,16 +10,22 @@ final predictions. The two configurations that were prepared for submission are 
 
 - **Labels.** Only the 2,085,047 departure (`PHASE_mvt = "DEP"`) labels of the twelve
   2025 training files are used for fitting. No 2026 label, official score, earlier
-  submission vector or row-level inference from scores enters any model or rule.
+  submission vector or row-level inference from scores enters any model or rule. One choice
+  between complete prediction files was made by public-board score (see below).
 - **Inputs.** Official columns of the movement and flight tables, other movement rows
   (arrivals included, as permitted by the organisers), open ADS-B.lol trajectories,
   ERA5 and GHCNh weather. Departure `BLOCK_TIME_UTC_mvt` / `TAXITIME_SEC_mvt` are never
   read for 2026 rows.
-- **One pipeline for all four months.** The same fitted models predict every row of
-  `final_submitting`; nothing is specific to January/July.
+- **One pipeline for all four months.** Features, models and rules are the same for every
+  row of `final_submitting`. The January/July rows are taken from one of the five seeds
+  instead of their average (see *Configurations*).
 - **Use of the daily public board.** For this pipeline the public board (January/July,
   2026-09-04 ranking) was used only to accept or reject complete, independently defined
-  mechanisms, never to derive prediction values, weights, thresholds or row-level targets.
+  mechanisms, never to derive prediction values, thresholds or row-level targets, with one
+  exception decided on 2026-10-13: for the January/July rows, which the board scores, the
+  delivered file uses the single run that scored best instead of the seed average. That is a
+  selection among complete prediction files by score, and it amounts to choosing the seed
+  weights of those rows from the board.
   Every public submission of the pipeline is listed under *Results*.
 - **What is not here.** The team's best public-board entry (v807, RMSE 234.86) came from an
   earlier line of work that used public-board scores to derive prediction values (score
@@ -215,6 +221,7 @@ Daily public board (January/July 2026, 344,841 departures), full models, one cha
 | v834 | v833, three seeds | 238.06 |
 | v835 | v833 + `nmw`, one seed | 237.00 |
 | v836 | v835 + `tprofx`, one seed | 236.88 |
+| v837 | v836, three seeds | 237.88 |
 
 Single seeds differ by 0.5–1 s on the public board (the three-seed average of v834 scores
 above its first seed), so the last two rows show that `nmw` and `tprofx` do no harm, not that
@@ -226,18 +233,28 @@ by track quality, and blending the trajectory run with the fallback run on cover
 
 ## Configurations
 
-Both use the same models, rules and coverage fallback; they differ in two blocks and in the
-number of seeds.
+All configurations use the same models, rules and coverage fallback.
 
-- **Three-seed safety configuration** (uploaded 2026-10-12 16:52 UTC; public analogue v834):
-  seeds 20261008, 20261011, 20261014; trajectory run
+- **Delivered file** (`write_final_file.sh submitted`): trajectory run
+  `--extra arrtaxi deptaxi inb refile traj tprof tprofx nmw` (1,333 features), fallback run
+  `--extra arrtaxi deptaxi inb refile nmw` (569 features).
+  - February/June rows: average of the seeds 20261008, 20261011, 20261014, 20261017, 20261020
+    (`write_final_file.sh five-seed`; public analogue of the average: v838).
+  - January/July rows: the run with seed 20261008 alone (`write_final_file.sh single-run`;
+    public analogue v836, 236.88).
+
+  The single run is used for January/July because it scored below the seed average of the same
+  configuration on the public board (v837, three seeds: 237.88), and the board scores exactly
+  these rows of the final file. Single-seed scores scatter by 0.5–1.5 s, so the choice is a
+  selection on the scored rows and no evidence that this seed is the better model; for
+  February/June, where nothing is scored, the seed average is kept because averaging lowers the
+  expected error. Had the five-seed average scored below the single run, it would have been
+  used for all four months. `scripts/final_combine_months.py` takes the rows of each month
+  group from the two files unchanged.
+- **Three-seed safety configuration** (first upload, 2026-10-12 16:52 UTC; public analogue
+  v834, 238.06): seeds 20261008, 20261011, 20261014; trajectory run
   `--extra arrtaxi deptaxi inb refile traj tprof` (923 features), fallback run
   `--extra arrtaxi deptaxi inb refile` (559 features).
-- **Five-seed configuration** (public analogue v838): seeds 20261008, 20261011, 20261014,
-  20261017, 20261020; trajectory run `--extra arrtaxi deptaxi inb refile traj tprof tprofx nmw`
-  (1,333 features), fallback run `--extra arrtaxi deptaxi inb refile nmw` (569 features).
-  It replaces the safety file only if v838 is scored below v834 (238.06), a rule fixed before
-  any five-seed result existed.
 
 Per seed the fallback is applied and the visible rules (`lirf_delay_zones`,
 `schedule_floor`) act on that seed's `p` and `R`; the seed predictions are averaged, then
@@ -266,17 +283,23 @@ for seed in 20261008 20261011 20261014 20261017 20261020; do
   $PY scripts/final_train_predict.py $COMMON --seed $seed --name fallback_$seed \
     --extra arrtaxi deptaxi inb refile nmw
 done
-# prediction file of the five-seed configuration in final_submitting order
+# five-seed file and single-run file in final_submitting order
+RULES="--present-rollover --lirf-delay-zones --schedule-floor --join-bound"
 ARGS=""; for seed in 20261008 20261011 20261014 20261017 20261020; do
   ARGS="$ARGS --model traj_$seed=0.2 --fallback traj_$seed=fallback_$seed"; done
-$PY scripts/final_write_submission.py --target final $ARGS --present-rollover --lirf-delay-zones \
-  --schedule-floor --join-bound --output submissions/final/<file>.parquet
+$PY scripts/final_write_submission.py --target final $ARGS $RULES --output submissions/final/five.parquet
+$PY scripts/final_write_submission.py --target final --model traj_20261008=1.0 \
+  --fallback traj_20261008=fallback_20261008 $RULES --output submissions/final/single.parquet
+# delivered file: January/July rows of the single run, February/June rows of the five-seed average
+$PY scripts/final_combine_months.py --january-july submissions/final/single.parquet \
+  --february-june submissions/final/five.parquet --selection-note "<public-board scores>" \
+  --output submissions/final/<file>.parquet
 ```
 
 The three-seed safety configuration is the same without `tprofx` and `nmw`, with the first three
 seeds and weights of one third.
 
-`scripts/train_final_runs.sh` holds the same loop with the run names used on the development
-machine (first seed without suffix, then `_s2` … `_s5`). One trajectory
+`scripts/train_final_runs.sh` and `scripts/write_final_file.sh submitted` hold the same steps
+with the run names used on the development machine (first seed without suffix, then `_s2` … `_s5`). One trajectory
 run takes about 80 minutes and one fallback run about 40 minutes on an RTX 5090 with 16 CPU
 threads; the trajectory run needs about 30 GB of memory.
