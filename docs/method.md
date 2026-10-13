@@ -31,8 +31,9 @@ final predictions. The two configurations that were prepared for submission are 
   earlier line of work that used public-board scores to derive prediction values (score
   probes, and blending coefficients between submissions solved from official RMSE values).
   That line cannot predict February and June, contributes nothing to the final predictions
-  and is not part of this repository. The pipeline described here scores 236.88 on the
-  public board (v836).
+  and is not part of this repository. The pipeline described here scores 236.1026 on the
+  public board with the same-date condition (v841, public-chain); before that condition,
+  the same seed scored 236.8756 (v836).
 
 ## Target structure
 

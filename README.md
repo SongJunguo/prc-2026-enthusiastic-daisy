@@ -52,8 +52,9 @@ public-board score decides between predictions. `scripts/final_combine_months.py
 files and records the choice in the manifest.
 
 State at this commit (2026-10-13): the team bucket holds `enthusiastic-daisy_final.parquet`,
-uploaded at 2026-10-13 17:55:57 UTC from
+uploaded at 2026-10-13 17:56:02 UTC from
 `submissions/final/final_candidate_jj_single_fj_five_sd.parquet` (670,790 rows, 8,641,689 bytes).
+The upload ledger records 17:56:02.710224 UTC; the remote object's LastModified is 17:55:57 UTC.
 It is the month combination described above. It replaces the file uploaded at 06:06:58 UTC and
 differs from it in one row: a LIRF departure of 22 January 2026 (`MVT_ID` 202687258), which the
 same-date condition of the delay zones (`docs/method.md`, *Structure of the provided tables*,
@@ -244,7 +245,7 @@ the stored inputs and runs of the development machine. On 2026-10-13 the `submit
 configuration passed all 17 checks (`ALL PASS`, output in `docs/reproduction_check.txt`): all
 modules import, all command-line scripts answer `--help`, and `write_final_file.sh submitted`
 on the stored runs reproduces the delivered month combination value for value against
-`final_candidate_jj_single_fj_five_sd.parquet`, the file uploaded at 17:55:57 UTC (the check
+`final_candidate_jj_single_fj_five_sd.parquet`, the file recorded as uploaded at 17:56:02 UTC (the check
 was repeated at 18:00 UTC after the same-date condition). The five context blocks of the public file and
 the three trajectory blocks for public LSZH January 2026, training EDDM March 2025 and final
 EHAM February 2026 are reproduced value for value. The earlier `score_validation_folds.py`
