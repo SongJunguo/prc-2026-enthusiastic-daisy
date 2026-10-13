@@ -15,6 +15,7 @@ from typing import Any
 import pandas as pd
 import pyarrow.parquet as pq
 import requests
+from prc2026.direct_source_session import requests_session
 import yaml
 
 from prc2026.external import USER_AGENT, load_airport_config, write_manifest
@@ -347,7 +348,7 @@ def main() -> None:
             raise ValueError(f"Unknown competition airports: {unknown}")
         selected_airports = sorted(set(args.airports))
 
-    session = requests.Session()
+    session = requests_session()
     raw_dir = (
         Path(args.data_root)
         / "raw"

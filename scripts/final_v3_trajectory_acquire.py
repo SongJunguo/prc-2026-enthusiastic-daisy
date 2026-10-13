@@ -2,7 +2,7 @@
 """Download and decode February/June 2026 ADSB.lol days for the final blind phase.
 
 Same public preferred releases, decoder and retention as full_history_training_v2.
-Transport clears proxy variables; host TUN routing must be forced to DIRECT;
+Downloads use ordinary HTTPS with environment proxies disabled;
 exact sizes are checked against the saved public release metadata.  No DEP
 labels are read, no model is fitted and nothing is uploaded.
 """
@@ -11,9 +11,7 @@ import gzip
 from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor, wait, FIRST_COMPLETED
 import json
 import multiprocessing
-import os
 from pathlib import Path
-from queue import Queue
 import re
 import shutil
 import subprocess
@@ -28,20 +26,17 @@ from datetime import datetime
 ROOT = Path(__file__).resolve().parents[1]
 sys.path[:0] = [str(ROOT), str(ROOT / 'src')]
 
-import urllib3
+from requests.adapters import HTTPAdapter
 import yaml
-from prc2026.full_history_acquisition import save, now, log, preferred_entries
+from prc2026.full_history_acquisition import save, now, log, preferred_entries, validate_asset_url
 from prc2026.full_history_features import month_dates
 from prc2026.final_history_retention import decode_and_retain_final, retire_final_backup
 from prc2026.full_history_acquisition import HTTPStop
 from prc2026.adsblol_archive_range import validate_range_headers
 from prc2026.run_guards import execution_lock
-from prc2026.direct_source_session import requests_session, direct_port, DirectAuthAdapter
-from prc2026.full_history_direct_transport import pinned_url
+from prc2026.direct_source_session import requests_session
 
 CONFIG = ROOT / 'configs/final_trajectory_v3.yaml'
-for key in ['HTTP_PROXY', 'HTTPS_PROXY', 'ALL_PROXY', 'http_proxy', 'https_proxy', 'all_proxy']:
-    os.environ.pop(key, None)
 
 
 def settings():
@@ -143,12 +138,10 @@ class NativeSourceDecodeError(RuntimeError):
 
 
 def prepare_asset_api_catalog(c, days):
-    path = ROOT / c['run_root'] / 'asset_api_urls.json'
-    catalog = json.loads(path.read_text()) if path.exists() else {}
     if not c['transport'].get('use_public_release_api', False):
         return
-    if not direct_port():
-        raise RuntimeError('Public asset API requires the task DIRECT listener')
+    path = ROOT / c['run_root'] / 'asset_api_urls.json'
+    catalog = json.loads(path.read_text()) if path.exists() else {}
     needed = []
     for day in days:
         marker = ROOT / c['processed_root'] / 'dates' / day['date'] / 'point_only.json'
@@ -186,21 +179,15 @@ def prepare_asset_api_catalog(c, days):
     session.close()
 
 
-class FairHTTPSConnectionPool(urllib3.HTTPSConnectionPool):
-    # A failed connect returns an empty credit. LIFO can repeatedly select that
-    # credit instead of older healthy sockets while slow asset tails occupy slots.
-    QueueCls = Queue
-
-
 class Downloader:
     def __init__(self, tc, stop):
         self.tc = tc; self.lock = threading.Lock(); self.body_bytes = 0
         self.local = threading.local(); self.stop = stop
-        self.payload_manager = None
         # Redirect bodies are consumed by Requests even with redirects disabled.
         # Serialize the tiny signed-location requests onto one warm TLS socket;
         # a large mostly-empty metadata pool otherwise encourages cold connects.
-        self.meta_adapter = DirectAuthAdapter(pool_connections=4, pool_maxsize=1, pool_block=True)
+        self.meta_adapter = HTTPAdapter(pool_connections=4, pool_maxsize=1, pool_block=True)
+        self.payload_adapter = HTTPAdapter(pool_connections=4, pool_maxsize=48, pool_block=True)
         api_path = ROOT / 'artifacts/runs/final_trajectory_v3/asset_api_urls.json'
         self.api_urls = json.loads(api_path.read_text()) if api_path.exists() and tc.get('use_public_release_api', False) else {}
         if self.api_urls:
@@ -212,32 +199,24 @@ class Downloader:
                         or asset['size'] != item['size']
                         or not re.fullmatch(r'https://api\.github\.com/repos/adsblol/globe_history_2026/releases/assets/[1-9][0-9]*', asset['url'])):
                     raise ValueError('API catalog differs from the admitted public asset')
-        self.cdn_ips = json.loads(os.environ.get('PRC_FINAL_CDN_IPS', '[]'))
-        if direct_port() and not self.cdn_ips:
-            raise ValueError('Pinned DIRECT transfer requires current public DNS answers')
 
     def session(self):
         if not hasattr(self.local, 's'):
             self.local.s = requests_session(self.meta_adapter)
         return self.local.s
 
-    def manager(self):
-        with self.lock:
-            if self.payload_manager is None:
-                endpoint = f'http://127.0.0.1:{direct_port()}'
-                self.payload_manager = urllib3.ProxyManager(endpoint,
-                    proxy_headers=DirectAuthAdapter().proxy_headers(endpoint),
-                    server_hostname='release-assets.githubusercontent.com',
-                    assert_hostname='release-assets.githubusercontent.com', cert_reqs='CERT_REQUIRED',
-                    maxsize=48, block=True)
-                self.payload_manager.pool_classes_by_scheme = {
-                    **self.payload_manager.pool_classes_by_scheme,
-                    'https': FairHTTPSConnectionPool,
-                }
-            return self.payload_manager
+    def payload_session(self):
+        if not hasattr(self.local, 'payload'):
+            self.local.payload = requests_session(self.payload_adapter)
+        return self.local.payload
 
     def resolve(self, url):
+        validate_asset_url(url)
         api = self.api_urls.get(url)
+        if api and not re.fullmatch(
+                r'https://api\.github\.com/repos/adsblol/globe_history_2026/releases/assets/[1-9][0-9]*',
+                api['url']):
+            raise ValueError('Unexpected public asset API URL')
         for endpoint in [api['url'], url] if api else [url]:
             headers = {'Cache-Control': 'no-cache'}
             if api and endpoint == api['url']:
@@ -254,7 +233,10 @@ class Downloader:
                 if r.status_code not in (301, 302, 303, 307, 308):
                     raise RuntimeError(f'Unexpected public redirect status {r.status_code}')
                 location = r.headers['Location']; target = urlsplit(location)
-                if target.scheme != 'https' or target.hostname != 'release-assets.githubusercontent.com':
+                if (target.scheme != 'https' or target.hostname != 'release-assets.githubusercontent.com'
+                        or target.username or target.password or target.fragment
+                        or target.port not in (None, 443)
+                        or not target.path.startswith('/github-production-release-asset/')):
                     raise RuntimeError('Release redirect leaves the admitted source')
                 return location
         raise RuntimeError('No admitted source redirect')
@@ -284,21 +266,16 @@ class Downloader:
             r = None
             try:
                 location = self.location(holder)
-                if direct_port():
-                    ip = self.cdn_ips[(int(path.name) + attempt) % len(self.cdn_ips)]
-                    r = self.manager().request('GET', pinned_url(location, ip, 'release-assets.githubusercontent.com'),
-                        headers={'Host': 'release-assets.githubusercontent.com', 'Range': f'bytes={start+have}-{stop-1}',
-                                 'Accept-Encoding': 'identity'}, preload_content=False, redirect=False, retries=False,
-                        timeout=urllib3.Timeout(connect=15, read=self.tc['timeout_seconds']))
-                    status = r.status
-                else:
-                    r = self.session().get(location, headers={'Range': f'bytes={start+have}-{stop-1}'},
-                                           stream=True, allow_redirects=False, timeout=self.tc['timeout_seconds'])
-                    status = r.status_code
+                r = self.payload_session().get(
+                    location, headers={'Range': f'bytes={start+have}-{stop-1}', 'Accept-Encoding': 'identity'},
+                    stream=True, allow_redirects=False, timeout=(15, self.tc['timeout_seconds']))
+                status = r.status_code
                 if status in (401, 403, 429):
                     self.stop.set(); raise HTTPStop(status)
                 validate_range_headers(status, r.headers, start+have, stop-1, holder['size'])
-                chunks = iter(lambda: r.read1(1 << 18, decode_content=False), b'') if direct_port() else r.iter_content(1 << 18)
+                # read1 returns available bytes so a slow trickle cannot defer
+                # the throughput-window check until a large chunk is filled.
+                chunks = iter(lambda: r.raw.read1(1 << 18, decode_content=False), b'')
                 window_start = time.monotonic(); window_bytes = 0
                 with open(path, 'ab') as f:
                     for chunk in chunks:
@@ -325,8 +302,6 @@ class Downloader:
             finally:
                 if r is not None:
                     r.close()
-                    if direct_port():
-                        r.release_conn()
         if not path.exists() or path.stat().st_size != stop - start:
             raise IOError(f'Segment failed after retries: {path}')
 

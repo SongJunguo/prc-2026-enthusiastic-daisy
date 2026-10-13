@@ -1,0 +1,67 @@
+Public-source download transport check — 2026-10-13 UTC
+
+Scope
+  Portable HTTPS acquisition only. No full archive download, decoding, model fit,
+  prediction, competition API/leaderboard/Discord request, or submission was run.
+  System proxy/VPN settings, other processes, and publication schedules were unchanged.
+  Source base: 879b01e5060af055f069fe2b2124d8ed64d58e7a.
+
+Offline checks
+  PYTHONPATH=src:. python -m unittest discover -s tests -v
+  57 tests passed, covering proxy-independent requests/fsspec clients, a local
+  commit without an upstream, source/CDN restrictions, TLS settings, exact Range
+  and length/encoding checks, truncated and oversized bodies, resumable prefixes,
+  finite byte/attempt budgets, corrupt checkpoint preservation, HTTP refusal,
+  and refusing new requests after a prior access refusal or exhausted budget.
+  Final slow streams are checked as available bytes arrive, retaining the prefix;
+  disabling the optional API also ignores an invalid old API catalog.
+  All 16 changed/new Python files compiled.
+  Nine argparse download entry points answered --help successfully.
+  download_full_history_direct_v1.py was tested with mocked dependencies, never
+  invoked with --help because its entry point begins acquisition.
+  git diff --check passed.
+
+Bounded public network checks (HK-2TB)
+  Empty temporary HOME, no HTTP(S)_PROXY/ALL_PROXY (including lowercase), no
+  PRC_FINAL_DIRECT_PORT/PRC_FINAL_CDN_IPS, no data/artifacts input cache.
+  Output and temporary checkpoints were isolated in temporary directories.
+  Production requests clients used trust_env=False and default verified TLS.
+  Production urllib3 transport used a PoolManager with CERT_REQUIRED and the
+  original CDN hostname; no fixed IPs, local proxy configuration, controller,
+  listener, credentials or service logs were used.
+
+  Implementation                         Date        HTTP  Range / total             Body
+  acquire_full_history_v1.probe           2025-01-01  206   0-16383 / 1682749440      16384
+  acquire_full_history_v1.probe           2025-07-01  206   0-16383 / 2000000000      16384
+  acquire_full_history_v1.probe           2026-01-01  206   0-16383 / 2000000000      16384
+  acquire_full_history_v1.probe           2026-07-01  206   0-16383 / 2000000000      16384
+  full_history_direct_transport.segment  2025-08-01  206   0-16383 / 2000000000      16384
+  final_v3 Downloader.segment (default)   2026-02-01  206   0-16383 / 2000000000      16384
+  final_v3 Downloader.segment (default)   2026-06-01  206   0-16383 / 2000000000      16384
+
+  All seven representative assets passed production source and exact Range
+  checks. Total archive response body: 114688 bytes (112 KiB); small public
+  metadata/redirect responses are additional. No archive payloads were reused.
+  The optional final asset API variant also passed two additional 16 KiB ranges
+  for February/June before the default was changed. Across both variants, nine
+  ranges transferred 147456 archive bytes (144 KiB) in total. The default browser
+  variant was then checked again with the restored available-byte read loop.
+  Each segment allowed one payload attempt; the processes were bounded by 240
+  seconds for the initial check and 90 seconds for each final-date check.
+
+  The initial smoke harness tried to parse unrelated preferred-index rows and
+  stopped with ValueError before February/June network checks. The harness was
+  narrowed to the two contracted dates, as the production manifest already is;
+  both then passed. The five successful earlier ranges were not repeated.
+  Final review disabled the optional per-asset API catalog by default to avoid its
+  all-assets quota gate on fresh checkouts; normal release redirects keep the same
+  published-size and Range contracts. Public release listings remain the metadata
+  source. Subsequent tests and the default-path network check passed.
+
+Limits
+  This verifies small fresh transfers on this host and regression behavior. It
+  does not establish full archive acquisition/decoding, sustained throughput,
+  complete date coverage, or connectivity on every external network. The host's
+  existing system routing was left in effect. ERA5 source authorization, existing
+  data/licence contracts, prior Jan/Jul preparation for supplementary decoding,
+  and subsequent fitting/build guards retain their original requirements.

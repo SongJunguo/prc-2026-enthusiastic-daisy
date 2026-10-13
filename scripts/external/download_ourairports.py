@@ -10,6 +10,7 @@ from pathlib import Path
 
 import pandas as pd
 import requests
+from prc2026.direct_source_session import requests_session
 
 from prc2026.external import (
     USER_AGENT,
@@ -49,7 +50,7 @@ def resolve_revision(session: requests.Session, requested: str | None) -> str:
 
 def main() -> None:
     args = parse_args()
-    session = requests.Session()
+    session = requests_session()
     revision = resolve_revision(session, args.source_revision)
     root = Path(args.data_root)
     raw_dir = root / "raw" / "ourairports" / args.snapshot

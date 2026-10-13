@@ -16,8 +16,6 @@ raw_retention: relevant_aircraft_entire_day_original_gzip_and_global_member_inde
 recycle_new_global_spool_after_native_audit: true
 maximum_active_dates: 12
 minimum_free_bytes: 107374182400
-direct_listener_name: prc-fullhistory-direct
-direct_listener_port: 17898
 airports: [EDDF, EDDM, EGLL, EHAM, LEBL, LEMD, LFPG, LIRF, LSZH, LTFM]
 airport_radius_km: 50.0
 decode_workers: 4
@@ -32,10 +30,9 @@ fits_models: false
 uploads_submissions: false
 transport:
   payload_route: DIRECT
-  metadata_redirect_route: existing_proxy_after_measured_github_direct_timeout
+  metadata_redirect_route: DIRECT
   metadata_response_body_bytes: 0
   cdn_host: release-assets.githubusercontent.com
-  cdn_ipv4_candidates: [185.199.111.133, 185.199.109.133]
   asset_workers: 12
   segments_per_asset: 4
   segment_bytes: 33554432

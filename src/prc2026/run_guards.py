@@ -22,6 +22,15 @@ def aligned_take(frame, ids):
     return frame.set_index(ID).reindex(wanted).reset_index()
 
 
+def clean_head():
+    """Record committed download code without requiring a remote or upstream."""
+    if subprocess.check_output(["git", "status", "--porcelain"], cwd=ROOT):
+        raise ValueError("Commit the download code and configuration before acquiring data")
+    return subprocess.check_output(
+        ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True
+    ).strip()
+
+
 def clean_pushed_head():
     if subprocess.check_output(["git", "status", "--porcelain"], cwd=ROOT):
         raise ValueError("Commit and push the code and configuration before building")

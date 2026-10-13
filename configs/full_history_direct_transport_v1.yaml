@@ -1,9 +1,8 @@
 experiment: full_history_direct_transport_v1
 payload_route: DIRECT
-metadata_redirect_route: existing_proxy_after_measured_github_direct_timeout
+metadata_redirect_route: DIRECT
 metadata_response_body_bytes: 0
 cdn_host: release-assets.githubusercontent.com
-cdn_ipv4_candidates: [185.199.111.133, 185.199.109.133]
 asset_workers: 4
 segments_per_asset: 8
 segment_bytes: 33554432

@@ -2,7 +2,7 @@ experiment: final_trajectory_v3
 # Final blind phase announced 2026-10-08: February and June 2026 are new
 # scored months.  Same public ADSB.lol source, selection and decoder as
 # full_history_training_v2; only the calendar and a plain direct transport
-# with temporary source-domain DIRECT routing differ.
+# without local proxy configuration differ.
 source_id: adsblol_historical_adsb
 year: 2026
 months: [2, 6]
@@ -29,7 +29,8 @@ reads_dep_labels: false
 fits_models: false
 uploads_submissions: false
 transport:
-  use_public_release_api: true
+  # Normal release redirects avoid a per-asset API quota requirement on fresh clones.
+  use_public_release_api: false
   asset_workers: 12
   segments_per_asset: 4
   segment_bytes: 33554432

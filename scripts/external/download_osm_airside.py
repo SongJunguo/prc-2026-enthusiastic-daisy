@@ -12,6 +12,7 @@ from pathlib import Path
 
 import pandas as pd
 import requests
+from prc2026.direct_source_session import requests_session
 
 from prc2026.external import USER_AGENT, load_airport_config, summarize_osm_elements, write_manifest
 
@@ -103,7 +104,7 @@ def main() -> None:
     raw_dir = root / "raw" / "openstreetmap_airside" / args.snapshot
     processed_dir = root / "processed" / "openstreetmap_airside" / args.snapshot
     processed_dir.mkdir(parents=True, exist_ok=True)
-    session = requests.Session()
+    session = requests_session()
     summaries = []
     records = []
     for position, airport in enumerate(airports):

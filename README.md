@@ -103,7 +103,7 @@ scripts/
   acquire_full_history_v1.py, download_full_history_direct_v1.py, rebuild_full_history_v1.py,
   compact_full_history_v1.py, supplement_full_history_training_v2.py, final_v3_trajectory_acquire.py
                                ADS-B.lol history (2025, January/July 2026, February/June 2026);
-                               acquire_july_archive_v259.py and audit_full_history_rebuild_v1.py
+                               audit_full_history_rebuild_v1.py
                                hold helpers they import
   build_feature_cache.py, build_full_history_*.py, final_v3_build_trajectory_features.py,
   final_v3_assemble_inputs.py  base model inputs for 2025, the public file and the final file
@@ -162,27 +162,32 @@ All commands run from the repository root with `PYTHONPATH=src`.
 assets: those of 2025 and January/July 2026 are listed with their sizes in
 `configs/full_history_*_assets.json`, those of February/June 2026 are selected from
 `configs/adsblol/preferred_2026.txt` (a copy of ADS-B.lol's list of preferred releases).
-**Not portable as written.** The development machine sits behind a proxy client (Mihomo/Clash,
-configuration at `~/clashctl/resources/runtime.yaml`). The ADS-B.lol download scripts send
-large transfers through a temporary direct listener of that client and stop without it. On
-another machine these parts have to be replaced:
+All public-data download clients use ordinary HTTPS with certificate and hostname
+verification. They ignore environment proxy variables and do not read local proxy
+configuration, contact a controller, create listeners, inspect service logs, or require
+`PRC_FINAL_DIRECT_PORT`. Release URLs and CDN redirects remain restricted to the
+registered public source; byte ranges, declared sizes, transfer budgets and resumable
+checkpoints are still checked. CDN connections use normal DNS rather than fixed IPs. The final-date downloader uses
+public release redirects by default; its optional per-asset API catalog is disabled,
+so a fresh checkout does not require an API quota reserved for every payload. The
+public release listing still supplies the published sizes.
 
-- `scripts/acquire_july_archive_v259.py`: `DirectListener` creates and removes the listener
-  through the client's control interface, `asset_session` is a `requests` session through the
-  listener, `route_lines` reads the client's journal as a record of the route taken. A plain
-  `requests.Session()` replaces the session; the other two have no counterpart.
-- `src/prc2026/full_history_direct_transport.py`: `TransferState.manager` opens a
-  `urllib3.ProxyManager` through the listener to the release CDN addresses of the configuration,
-  which the calling scripts first compare with the client's DNS answer, and `redirect_url`
-  resolves the release redirect through the client's ordinary port. A `urllib3.PoolManager`
-  with the same TLS host check replaces both.
-- `scripts/final_v3_trajectory_acquire.py`: with `use_public_release_api: true` (the setting in
-  `configs/final_trajectory_v3.yaml`) it requires the listener port in `PRC_FINAL_DIRECT_PORT`.
+The download entry points require a clean, locally committed Git checkout to record
+the source version; they do not require an upstream branch or a push. Subsequent data
+builders and fitting guards retain their existing clean-and-pushed source requirement.
+External-data commands in step 1 use the same proxy-independent clients. ERA5 still
+requires its documented source authorization; data licences and source contracts are
+unchanged.
 
-`src/prc2026/direct_source_session.py`, used by the ERA5 and GHCNh downloads, already uses plain
-sessions when `PRC_FINAL_DIRECT_PORT` is not set. The full-history scripts also call
-`run_guards.clean_pushed_head`, which requires a clean checkout whose HEAD equals its upstream
-branch. Decoding and every later step do not depend on the listener.
+Offline download regression tests (no download, fitting or prediction):
+
+```bash
+PYTHONPATH=src:. python -m unittest discover -s tests -v
+```
+
+A bounded public-source transport check is recorded in
+[`docs/download_transport_check.txt`](docs/download_transport_check.txt). It checks
+small ranges in temporary directories, not complete archive acquisition or decoding.
 
 **3. Base model inputs** (483 columns per departure, same contract for all populations):
 

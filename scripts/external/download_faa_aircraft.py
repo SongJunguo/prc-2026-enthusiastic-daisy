@@ -12,6 +12,7 @@ from pathlib import Path
 import pandas as pd
 import pyarrow.parquet as pq
 import requests
+from prc2026.direct_source_session import requests_session
 
 from prc2026.aircraft import (
     normalize_aircraft_type,
@@ -94,7 +95,7 @@ def main() -> None:
         SOURCE_URL,
         raw_path,
         refresh=args.refresh,
-        session=requests.Session(),
+        session=requests_session(),
     )
     with warnings.catch_warnings():
         warnings.filterwarnings(

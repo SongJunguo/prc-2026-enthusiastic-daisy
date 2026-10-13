@@ -11,6 +11,7 @@ import holidays
 import numpy as np
 import pandas as pd
 import requests
+from .direct_source_session import requests_session
 
 import yaml
 
@@ -52,7 +53,7 @@ def atomic_download(
         return {"status": "existing", "path": str(path), "bytes": path.stat().st_size}
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = path.with_name(f".{path.name}.part")
-    client = session or requests.Session()
+    client = session or requests_session()
     with client.get(
         url,
         headers={"User-Agent": USER_AGENT, "Accept-Encoding": "identity"},
