@@ -314,7 +314,7 @@ $PY scripts/final_write_submission.py --target final --model traj_20261008=1.0 \
 # delivered file: January/July rows of the single run, February/June rows of the five-seed average
 $PY scripts/final_combine_months.py --january-july submissions/final/single.parquet \
   --february-june submissions/final/five.parquet --selection-note "<public-board scores>" \
-  --output submissions/final/<file>.parquet
+  --output submissions/final/final_submitted.parquet
 ```
 
 The three-seed safety configuration is the same without `tprofx` and `nmw`, with the first three
