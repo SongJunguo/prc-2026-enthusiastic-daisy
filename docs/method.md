@@ -208,7 +208,7 @@ prints the fold RMSE reported under *Results*.
 | + `nmw` | 297.00 | 261.59 |
 | + `nmw tprofx` | 296.94 | 261.46 |
 
-Daily public board (January/July 2026, 344,841 departures), full models, one change per row:
+Daily public board (January/July 2026, 344,841 departures), full models:
 
 | version | change | RMSE |
 |---|---|---:|
@@ -222,9 +222,14 @@ Daily public board (January/July 2026, 344,841 departures), full models, one cha
 | v835 | v833 + `nmw`, one seed | 237.00 |
 | v836 | v835 + `tprofx`, one seed | 236.88 |
 | v837 | v836, three seeds | 237.88 |
+| v838 | v836, five seeds, public-chain predictions | 237.8486 |
+| v839 | January/July rows of the delivered final-chain file, taken by MVT_ID into public-board order | 236.9858 |
+
+v839 checks the delivered final predictions, whose inputs include the final export jitter;
+it is not a re-upload of v836 or a four-month final blind score.
 
 Single seeds differ by 0.5–1 s on the public board (the three-seed average of v834 scores
-above its first seed), so the last two rows show that `nmw` and `tprofx` do no harm, not that
+above its first seed), so v835 and v836 show that `nmw` and `tprofx` do no harm, not that
 they help; the 2025 folds say the same. Ideas that did not improve the folds were left out
 and their code is not in this repository: counts of other unmatched delayed departures,
 daily ATFM delay per airport, trajectory features for unmatched departures, flight
@@ -239,18 +244,20 @@ All configurations use the same models, rules and coverage fallback.
   `--extra arrtaxi deptaxi inb refile traj tprof tprofx nmw` (1,333 features), fallback run
   `--extra arrtaxi deptaxi inb refile nmw` (569 features).
   - February/June rows: average of the seeds 20261008, 20261011, 20261014, 20261017, 20261020
-    (`write_final_file.sh five-seed`; public analogue of the average: v838).
+    (`write_final_file.sh five-seed`; public analogue of the average: v838, 237.8486).
   - January/July rows: the run with seed 20261008 alone (`write_final_file.sh single-run`;
     public analogue v836, 236.88).
 
   The single run is used for January/July because it scored below the seed average of the same
-  configuration on the public board (v837, three seeds: 237.88), and the board scores exactly
-  these rows of the final file. Single-seed scores scatter by 0.5–1.5 s, so the choice is a
+  configuration on the public board (v837, three seeds: 237.8765; v838, five seeds: 237.8486),
+  and the board scores the same departures as the January/July rows of the final file.
+  Single-seed scores scatter by 0.5–1.5 s, so the choice is a
   selection on the scored rows and no evidence that this seed is the better model; for
   February/June, where nothing is scored, the seed average is kept because averaging lowers the
-  expected error. Had the five-seed average scored below the single run, it would have been
-  used for all four months. `scripts/final_combine_months.py` takes the rows of each month
-  group from the two files unchanged.
+  expected error. The five-seed average scored above the single run, so it was not used for
+  all four months. `scripts/final_combine_months.py` takes the rows of each month group from
+  the two files unchanged. The delivered January/July subset scored 236.9858 as v839 on the
+  public board after mapping the final-chain predictions by MVT_ID.
 - **Three-seed safety configuration** (first upload, 2026-10-12 16:52 UTC; public analogue
   v834, 238.06): seeds 20261008, 20261011, 20261014; trajectory run
   `--extra arrtaxi deptaxi inb refile traj tprof` (923 features), fallback run

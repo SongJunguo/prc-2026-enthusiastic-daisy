@@ -1,22 +1,31 @@
-scripts/check_reproduction.py --configuration three-seed --reference <uploaded enthusiastic-daisy_final.parquet>
-run on the development machine, 2026-10-12T18:26Z, tree of the commit that adds this file
+scripts/check_reproduction.py --configuration submitted --reference ../PRC-2026/submissions/final/final_candidate_jj_single_fj_five.parquet
+run in ubuntu-kvm with /home/sjg/miniconda3/envs/prc2026_gpu/bin/python, 2026-10-13; ALL PASS confirmed at 06:20:48 UTC
 
 PASS import every module of src/prc2026
 PASS --help of every command-line script
-PASS three-seed file written from the stored runs equals the reference file
+PASS submitted file written from the stored runs equals the reference file
 PASS arr_taxi_context block of the public file
 PASS dep_taxi_context block of the public file
 PASS refile_context block of the public file
 PASS inbound_context block of the public file
 PASS nm_witness block of the public file
+{"population": "public", "kind": "matched", "year": 2026, "month": 1, "airport": "LSZH", "rows": 9358, "points_read": 5604518, "seconds": 16.951898073981283, "dep_labels_read": false}
 PASS trajectory part public LSZH 2026-01 matched (9358 rows)
+{"population": "public", "kind": "profile", "year": 2026, "month": 1, "airport": "LSZH", "rows": 9358, "points_read": 5604518, "seconds": 12.11602703499375, "dep_labels_read": false}
 PASS trajectory part public LSZH 2026-01 profile (9358 rows)
+{"population": "public", "kind": "profilex", "year": 2026, "month": 1, "airport": "LSZH", "rows": 9358, "points_read": 5604518, "seconds": 12.112840597023023, "dep_labels_read": false}
 PASS trajectory part public LSZH 2026-01 profilex (9358 rows)
+{"population": "train2025", "kind": "matched", "year": 2025, "month": 3, "airport": "EDDM", "rows": 11712, "points_read": 5131100, "seconds": 17.10640933198738, "dep_labels_read": false}
 PASS trajectory part train2025 EDDM 2025-03 matched (11712 rows)
+{"population": "train2025", "kind": "profile", "year": 2025, "month": 3, "airport": "EDDM", "rows": 11712, "points_read": 5131100, "seconds": 11.139404309011297, "dep_labels_read": false}
 PASS trajectory part train2025 EDDM 2025-03 profile (11712 rows)
+{"population": "train2025", "kind": "profilex", "year": 2025, "month": 3, "airport": "EDDM", "rows": 11712, "points_read": 5131100, "seconds": 11.158152222022181, "dep_labels_read": false}
 PASS trajectory part train2025 EDDM 2025-03 profilex (11712 rows)
+{"population": "final", "kind": "matched", "year": 2026, "month": 2, "airport": "EHAM", "rows": 16158, "points_read": 12705102, "seconds": 35.56000133600901, "dep_labels_read": false}
 PASS trajectory part final EHAM 2026-02 matched (16158 rows)
+{"population": "final", "kind": "profile", "year": 2026, "month": 2, "airport": "EHAM", "rows": 16158, "points_read": 12705102, "seconds": 19.565576908004005, "dep_labels_read": false}
 PASS trajectory part final EHAM 2026-02 profile (16158 rows)
+{"population": "final", "kind": "profilex", "year": 2026, "month": 2, "airport": "EHAM", "rows": 16158, "points_read": 12705102, "seconds": 19.61424873600481, "dep_labels_read": false}
 PASS trajectory part final EHAM 2026-02 profilex (16158 rows)
 ALL PASS
 

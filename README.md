@@ -41,21 +41,23 @@ are predicted by fallback runs with `arrtaxi deptaxi inb refile nmw`.
   with seed 20261008 alone.
 
 **The January/July choice was made by public-board score.** On the board the single run scored
-236.88 (v836) and the three-seed average of the same configuration 237.88 (v837). Single seeds
-differ by 0.5–1.5 s there, so this says nothing about which seed is the better model; but the
-board scores exactly the January/July rows of the final file, and on 2026-10-13 the team decided
+236.8756 (v836), the three-seed average of the same configuration 237.8765 (v837), and the
+five-seed average 237.8486 (v838). Single seeds differ by 0.5–1.5 s there, so this says nothing
+about which seed is the better model; but the board scores the same January/July departures
+as those in the final file, and on 2026-10-13 the team decided
 to keep the run that scored best for those rows. For February and June no score exists and the
 seed average, which has the lower expected error, is used. This is the one place where a
 public-board score decides between predictions. `scripts/final_combine_months.py` joins the two
 files and records the choice in the manifest.
 
-State at this commit (2026-10-13 02:45 UTC): the last two seeds are being fitted and the team
-bucket still holds the three-seed safety file uploaded on 2026-10-12 16:52 UTC (blocks without
-`nmw` and `tprofx`, seeds 20261008/11/14; `write_final_file.sh three-seed`; public analogue v834,
-238.06). The file described above replaces it after the five-seed average is scored on the
-public board (v838); should that average score below the single run, it is used for all four
-months. The public-board score of the January/July rows of the delivered file (v839) is added
-here afterwards.
+State at this commit (2026-10-13): the team bucket holds `enthusiastic-daisy_final.parquet`,
+uploaded at 2026-10-13 06:06:58 UTC from
+`submissions/final/final_candidate_jj_single_fj_five.parquet` (670,790 rows, 8,641,689 bytes).
+It is the month combination described above. The five-seed public-chain file scored 237.8486
+(v838), above the single run. The January/July predictions of the delivered final-chain file,
+taken by `MVT_ID` into public-board order, scored 236.9858 (v839). Final inputs include export
+jitter, so v839 checks the delivered predictions rather than re-uploading v836; it is not a
+four-month final blind score.
 
 ## Results
 
@@ -63,6 +65,8 @@ here afterwards.
 |---|---:|
 | Public board, January/July 2026, this pipeline, one seed (v836) | 236.88 |
 | Public board, same configuration, average of three seeds (v837) | 237.88 |
+| Public board, same configuration, average of five seeds, public-chain (v838) | 237.8486 |
+| Public board, January/July rows of the delivered final-chain file, matched by MVT_ID (v839) | 236.9858 |
 | 2025 leave-month-out, hold out January + July (one XGBoost mixture with all blocks, visible rules applied) | 296.94 |
 | 2025 leave-month-out, hold out February + June (same) | 261.46 |
 
@@ -229,10 +233,13 @@ python scripts/score_validation_folds.py --name check
 ```
 
 **What was re-run from this tree.** `scripts/check_reproduction.py` compares this tree with
-the stored inputs and runs of the development machine. For the three-seed configuration it
-passes (output in `docs/reproduction_check.txt`): all modules import, all scripts answer `--help`, `write_final_file.sh three-seed` on the
-stored runs reproduces the uploaded file value for value, the five context blocks of the public
-file and nine sampled airport-months of the three trajectory blocks are reproduced value for
-value. `score_validation_folds.py` reproduces the fold numbers from the stored held-out
-predictions. Not re-run from this tree: the downloads and base model inputs (steps 1–3, run once
-during development with the same code) and the model fits themselves.
+the stored inputs and runs of the development machine. On 2026-10-13 the `submitted`
+configuration passed all 17 checks (`ALL PASS`, output in `docs/reproduction_check.txt`): all
+modules import, all command-line scripts answer `--help`, and `write_final_file.sh submitted`
+on the stored runs reproduces the delivered month combination value for value against
+`final_candidate_jj_single_fj_five.parquet`. The five context blocks of the public file and
+the three trajectory blocks for public LSZH January 2026, training EDDM March 2025 and final
+EHAM February 2026 are reproduced value for value. The earlier `score_validation_folds.py`
+outputs from the stored held-out predictions are retained at the end of the check record.
+Not re-run from this tree: the downloads and base model inputs (steps 1–3, run once during
+development with the same code) and the model fits themselves.
