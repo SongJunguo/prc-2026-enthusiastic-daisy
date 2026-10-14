@@ -33,7 +33,8 @@ final predictions. The two configurations that were prepared for submission are 
   That line cannot predict February and June, contributes nothing to the final predictions
   and is not part of this repository. The pipeline described here scores 236.1026 on the
   public board with the same-date condition (v841, public-chain); before that condition,
-  the same seed scored 236.8756 (v836).
+  the same seed scored 236.8756 (v836). The January/July rows of the delivered file itself
+  score 236.2115 (v844).
 
 ## Target structure
 
@@ -236,10 +237,37 @@ Daily public board (January/July 2026, 344,841 departures), full models:
 | v839 | January/July rows of the final-chain file delivered at that time, taken by MVT_ID into public-board order | 236.9858 |
 | v840 | v836 configuration, second seed (20261011) alone | 239.0009 |
 | v841 | v836 + same-date condition of the LIRF delay zones (one row differs) | 236.1026 |
+| v842 | v841 + shift of the LIRF schedule-state probability by the flight's rate of missing off-block times (not adopted) | 236.8003 |
+| v843 | v841 + later-date share for later-date rows of the third LIRF delay zone (not adopted) | 237.2836 |
+| v844 | January/July rows of the delivered final file, taken by MVT_ID into public-board order | 236.2115 |
 
 v839 checked the final-chain predictions delivered at that time, whose inputs include the
 final export jitter; it is not a re-upload of v836 or a four-month final blind score. The
-file delivered now differs from it in the one row that the same-date condition changes.
+file delivered now differs from it in the one row that the same-date condition changes; its
+January/July rows were scored the same way as v844.
+
+v842 and v843 (2026-10-14) are two rule candidates that lowered the error of the 2025 folds
+and raised it on the board. Each was defined from the 2025 labels alone and uploaded once,
+with the rule fixed in advance that the delivered file is replaced only if the candidate
+scores lower than v841 by a set margin (0.30 s and 0.05 s); neither did, the delivered file is
+unchanged and their code is not in this repository. The fold numbers below are over six
+leave-two-months-out folds that cover the twelve months of 2025 (JJ and FJ as under
+*Validation*; the other four with the blocks `arrtaxi deptaxi inb refile`), 242.41 before.
+
+- v842. The classifier's weights make rows with a short delay count little, and among LIRF
+  departures with NM columns and a delay of 25 to 60 minutes the share of rows recorded at
+  the scheduled time (no off-block time received) goes from below 1% to 100% by operator
+  (11.6% overall). The candidate shifted the log-odds of `p` by this rate, taken per flight
+  number and shrunk to the operator, for LIRF rows without NM columns delayed 1 h to 6 h and
+  LIRF rows with NM columns delayed more than 15 minutes. Six 2025 folds, coefficients
+  fitted on the other folds: 242.41 → 240.77, every fold lower. The models of the delivered
+  file follow the rate more closely than the single XGBoost mixtures of the folds, so the
+  shift was reduced to the difference (242.41 → 241.04 on the fold predictions). Public
+  board: 236.8003 against 236.1026.
+- v843. For the later-date rows of the third LIRF delay zone, `p` set to the
+  schedule-recorded share of that zone's later-date rows in 2025 (7 of 18) instead of the
+  mean of three estimates. Six 2025 folds: 242.41 → 242.15. It changes four rows of the
+  public file. Public board: 237.2836 against 236.1026.
 
 Single seeds differ by 0.5–2 s on the public board (the three-seed average of v834 scores
 above its first seed; the second seed alone, v840, scores 2.1 s above the first), so v835 and v836 show that `nmw` and `tprofx` do no harm, not that
@@ -259,7 +287,8 @@ All configurations use the same models, rules and coverage fallback.
   - February/June rows: average of the seeds 20261008, 20261011, 20261014, 20261017, 20261020
     (`write_final_file.sh five-seed`; public analogue of the average: v838, 237.8486).
   - January/July rows: the run with seed 20261008 alone (`write_final_file.sh single-run`;
-    public analogue v841, 236.10; v836 before the same-date condition of the delay zones, 236.88).
+    public analogue v841, 236.10; v836 before the same-date condition of the delay zones, 236.88;
+    the rows of the delivered file, taken by MVT_ID: v844, 236.2115).
 
   The single run is used for January/July because it scored below the seed average of the same
   configuration on the public board (v837, three seeds: 237.8765; v838, five seeds: 237.8486),

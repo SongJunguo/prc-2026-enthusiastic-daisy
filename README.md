@@ -51,7 +51,7 @@ seed average, which has the lower expected error, is used. This is the one place
 public-board score decides between predictions. `scripts/final_combine_months.py` joins the two
 files and records the choice in the manifest.
 
-State at this commit (2026-10-13): the team bucket holds `enthusiastic-daisy_final.parquet`,
+State at this commit (2026-10-14): the team bucket holds `enthusiastic-daisy_final.parquet`,
 uploaded at 2026-10-13 17:56:02 UTC from
 `submissions/final/final_candidate_jj_single_fj_five_sd.parquet` (670,790 rows, 8,641,689 bytes).
 The upload ledger records 17:56:02.710224 UTC; the remote object's LastModified is 17:55:57 UTC.
@@ -61,14 +61,22 @@ same-date condition of the delay zones (`docs/method.md`, *Structure of the prov
 item 4) moves from 64,838 s to 52,207 s. The condition was found on 2026-10-13 from the 2025
 labels; on the public board the single run with it scored 236.1026 (v841) against 236.8756
 without it (v836). The January/July predictions of the earlier delivered final-chain file,
-taken by `MVT_ID` into public-board order, had scored 236.9858 (v839). Final inputs include
-export jitter, so v839 checked delivered predictions rather than re-uploading v836; none of
-these is a four-month final blind score.
+taken by `MVT_ID` into public-board order, had scored 236.9858 (v839); those of the file
+delivered now score 236.2115 (v844, 2026-10-14). Final inputs include export jitter, so v839
+and v844 check delivered predictions rather than re-uploading v836 or v841; none of these is
+a four-month final blind score.
+
+On 2026-10-14 two further rule candidates, both defined from the 2025 labels, were checked on
+the public board with the rule fixed in advance that the delivered file is replaced only if
+they score lower by a set margin. Both scored higher (v842 236.8003, v843 237.2836, against
+236.1026 for the same run without them), so the delivered file was not changed and their
+code is not in this repository (`docs/method.md`, *Results*).
 
 ## Results
 
 | | RMSE (s) |
 |---|---:|
+| Public board, January/July rows of the delivered final file, matched by MVT_ID (v844) | 236.2115 |
 | Public board, January/July 2026, this pipeline, one seed, with the same-date condition of the LIRF delay zones (v841) | 236.1026 |
 | Public board, the same seed without that condition (v836) | 236.88 |
 | Public board, same configuration, second seed alone (v840) | 239.0009 |
